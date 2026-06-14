@@ -889,6 +889,65 @@ img {
     width: 100%;
 }
 
+/* Floating WhatsApp button on sale cards */
+.card-wa-float {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #25D366;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+    transition: var(--transition-smooth);
+    opacity: 0.9;
+}
+
+.card-wa-float i {
+    width: 20px;
+    height: 20px;
+}
+
+.card-wa-float:hover {
+    transform: scale(1.15);
+    opacity: 1;
+    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
+}
+
+.product-card:hover .card-wa-float {
+    opacity: 1;
+}
+
+/* Bottom price bar for sale cards */
+.p-bottom-price {
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.p-offer-price {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--gold-primary);
+    letter-spacing: 0.5px;
+}
+
+.p-offer-price .original-price {
+    text-decoration: line-through;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-right: 8px;
+    font-weight: 400;
+}
+
 /* Gallery Section */
 .gallery-section {
     padding: 100px 0;

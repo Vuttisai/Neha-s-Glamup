@@ -477,6 +477,303 @@ const jewelry = [
         description: "Exquisite, unique, and imported Korean jewelry piece. Featuring premium finishes and elegant design.",
         image: "assets/korean/InShot_20260613_225035183.jpg",
         isKorean: true
+    },
+    {
+        id: "korean-jewelry-34",
+        name: "Pastel Gemstone Earrings",
+        category: "selling",
+        price: "",
+        description: "Exquisite, unique, and imported Korean jewelry piece. Featuring premium finishes and elegant design.",
+        image: "assets/korean/20260613_221017.jpg",
+        isKorean: true
+    },
+    {
+        id: "korean-jewelry-35",
+        name: "Golden Leaf Drop Earrings",
+        category: "selling",
+        price: "",
+        description: "Exquisite, unique, and imported Korean jewelry piece. Featuring premium finishes and elegant design.",
+        image: "assets/korean/20260613_221145.jpg",
+        isKorean: true
+    },
+    {
+        id: "korean-jewelry-36",
+        name: "Crystal Vine Pendant",
+        category: "selling",
+        price: "",
+        description: "Exquisite, unique, and imported Korean jewelry piece. Featuring premium finishes and elegant design.",
+        image: "assets/korean/20260613_221200.jpg",
+        isKorean: true
+    },
+    {
+        id: "korean-jewelry-37",
+        name: "Rose Gold Infinity Bracelet",
+        category: "selling",
+        price: "",
+        description: "Exquisite, unique, and imported Korean jewelry piece. Featuring premium finishes and elegant design.",
+        image: "assets/korean/20260613_221227.jpg",
+        isKorean: true
+    },
+    {
+        id: "korean-jewelry-38",
+        name: "Pearl Cascade Earrings",
+        category: "selling",
+        price: "",
+        description: "Exquisite, unique, and imported Korean jewelry piece. Featuring premium finishes and elegant design.",
+        image: "assets/korean/20260613_221344.jpg",
+        isKorean: true
+    },
+    {
+        id: "korean-jewelry-39",
+        name: "Diamond Cluster Ring",
+        category: "selling",
+        price: "",
+        description: "Exquisite, unique, and imported Korean jewelry piece. Featuring premium finishes and elegant design.",
+        image: "assets/korean/20260613_221356.jpg",
+        isKorean: true
+    },
+    {
+        id: "korean-jewelry-40",
+        name: "Sapphire Chain Necklace",
+        category: "selling",
+        price: "",
+        description: "Exquisite, unique, and imported Korean jewelry piece. Featuring premium finishes and elegant design.",
+        image: "assets/korean/20260613_221525.jpg",
+        isKorean: true
+    },
+    {
+        id: "korean-jewelry-41",
+        name: "Celestial Star Studs",
+        category: "selling",
+        price: "",
+        description: "Exquisite, unique, and imported Korean jewelry piece. Featuring premium finishes and elegant design.",
+        image: "assets/korean/20260613_221638.jpg",
+        isKorean: true
+    },
+    {
+        id: "korean-jewelry-42",
+        name: "Vintage Pearl Brooch",
+        category: "selling",
+        price: "",
+        description: "Exquisite, unique, and imported Korean jewelry piece. Featuring premium finishes and elegant design.",
+        image: "assets/korean/20260613_221716.jpg",
+        isKorean: true
+    },
+    {
+        id: "korean-jewelry-43",
+        name: "Twisted Gold Hoop Earrings",
+        category: "selling",
+        price: "",
+        description: "Exquisite, unique, and imported Korean jewelry piece. Featuring premium finishes and elegant design.",
+        image: "assets/korean/20260613_221745.jpg",
+        isKorean: true
+    },
+    {
+        id: "korean-jewelry-44",
+        name: "Amethyst Drop Pendant",
+        category: "selling",
+        price: "",
+        description: "Exquisite, unique, and imported Korean jewelry piece. Featuring premium finishes and elegant design.",
+        image: "assets/korean/20260613_221807.jpg",
+        isKorean: true
+    },
+    {
+        id: "korean-jewelry-45",
+        name: "Floral Pearl Statement Ring",
+        category: "selling",
+        price: "",
+        description: "Exquisite, unique, and imported Korean jewelry piece. Featuring premium finishes and elegant design.",
+        image: "assets/korean/20260613_221817.jpg",
+        isKorean: true
+    },
+    {
+        id: "korean-jewelry-46",
+        name: "Delicate Moon Earrings",
+        category: "selling",
+        price: "",
+        description: "Exquisite, unique, and imported Korean jewelry piece. Featuring premium finishes and elegant design.",
+        image: "assets/korean/20260613_221839.jpg",
+        isKorean: true
+    },
+    {
+        id: "korean-jewelry-47",
+        name: "Baroque Pearl Necklace",
+        category: "selling",
+        price: "",
+        description: "Exquisite, unique, and imported Korean jewelry piece. Featuring premium finishes and elegant design.",
+        image: "assets/korean/20260613_221852.jpg",
+        isKorean: true
+    },
+    {
+        id: "korean-jewelry-48",
+        name: "Crystal Heart Pendant",
+        category: "selling",
+        price: "",
+        description: "Exquisite, unique, and imported Korean jewelry piece. Featuring premium finishes and elegant design.",
+        image: "assets/korean/20260613_221858.jpg",
+        isKorean: true
+    },
+    {
+        id: "korean-jewelry-49",
+        name: "Korean Turquoise Studs",
+        category: "selling",
+        price: "",
+        description: "Exquisite, unique, and imported Korean jewelry piece. Featuring premium finishes and elegant design.",
+        image: "assets/korean/20260613_221951.jpg",
+        isKorean: true
+    },
+    {
+        id: "korean-jewelry-50",
+        name: "Emerald Teardrop Earrings",
+        category: "selling",
+        price: "",
+        description: "Exquisite, unique, and imported Korean jewelry piece. Featuring premium finishes and elegant design.",
+        image: "assets/korean/20260613_222007.jpg",
+        isKorean: true
+    },
+    {
+        id: "korean-jewelry-51",
+        name: "Layered Chain Bracelet Set",
+        category: "selling",
+        price: "",
+        description: "Exquisite, unique, and imported Korean jewelry piece. Featuring premium finishes and elegant design.",
+        image: "assets/korean/20260613_222019.jpg",
+        isKorean: true
+    },
+    {
+        id: "korean-jewelry-52",
+        name: "Filigree Gold Ear Cuff",
+        category: "selling",
+        price: "",
+        description: "Exquisite, unique, and imported Korean jewelry piece. Featuring premium finishes and elegant design.",
+        image: "assets/korean/20260613_222035.jpg",
+        isKorean: true
+    },
+    {
+        id: "korean-jewelry-53",
+        name: "Opal Aurora Ring",
+        category: "selling",
+        price: "",
+        description: "Exquisite, unique, and imported Korean jewelry piece. Featuring premium finishes and elegant design.",
+        image: "assets/korean/20260613_222138.jpg",
+        isKorean: true
+    },
+    {
+        id: "korean-jewelry-54",
+        name: "Dainty Sunburst Pendant",
+        category: "selling",
+        price: "",
+        description: "Exquisite, unique, and imported Korean jewelry piece. Featuring premium finishes and elegant design.",
+        image: "assets/korean/20260613_222219.jpg",
+        isKorean: true
+    },
+    {
+        id: "korean-jewelry-55",
+        name: "Crystal Butterfly Hairpin",
+        category: "selling",
+        price: "",
+        description: "Exquisite, unique, and imported Korean jewelry piece. Featuring premium finishes and elegant design.",
+        image: "assets/korean/20260613_222249.jpg",
+        isKorean: true
+    },
+    {
+        id: "korean-jewelry-56",
+        name: "Rose Quartz Bead Bracelet",
+        category: "selling",
+        price: "",
+        description: "Exquisite, unique, and imported Korean jewelry piece. Featuring premium finishes and elegant design.",
+        image: "assets/korean/20260613_222345.jpg",
+        isKorean: true
+    },
+    {
+        id: "korean-jewelry-57",
+        name: "Polished Silver Cuff Ring",
+        category: "selling",
+        price: "",
+        description: "Exquisite, unique, and imported Korean jewelry piece. Featuring premium finishes and elegant design.",
+        image: "assets/korean/20260613_222434.jpg",
+        isKorean: true
+    },
+    {
+        id: "korean-jewelry-58",
+        name: "Luxe Pearl Anklet",
+        category: "selling",
+        price: "",
+        description: "Exquisite, unique, and imported Korean jewelry piece. Featuring premium finishes and elegant design.",
+        image: "assets/korean/20260613_222659.jpg",
+        isKorean: true
+    },
+    {
+        id: "korean-jewelry-59",
+        name: "Matte Gold Cuff Bracelet",
+        category: "selling",
+        price: "",
+        description: "Exquisite, unique, and imported Korean jewelry piece. Featuring premium finishes and elegant design.",
+        image: "assets/korean/20260613_222925.jpg",
+        isKorean: true
+    },
+    {
+        id: "korean-jewelry-60",
+        name: "Minimalist Wave Earrings",
+        category: "selling",
+        price: "",
+        description: "Exquisite, unique, and imported Korean jewelry piece. Featuring premium finishes and elegant design.",
+        image: "assets/korean/20260613_223151.jpg",
+        isKorean: true
+    },
+    {
+        id: "korean-jewelry-61",
+        name: "Vintage Charm Necklace",
+        category: "selling",
+        price: "",
+        description: "Exquisite, unique, and imported Korean jewelry piece. Featuring premium finishes and elegant design.",
+        image: "assets/korean/20260613_223206.jpg",
+        isKorean: true
+    },
+    {
+        id: "korean-jewelry-62",
+        name: "Korean Jade Studs",
+        category: "selling",
+        price: "",
+        description: "Exquisite, unique, and imported Korean jewelry piece. Featuring premium finishes and elegant design.",
+        image: "assets/korean/20260613_223528.jpg",
+        isKorean: true
+    },
+    {
+        id: "korean-jewelry-63",
+        name: "Frosted Glass Pendant",
+        category: "selling",
+        price: "",
+        description: "Exquisite, unique, and imported Korean jewelry piece. Featuring premium finishes and elegant design.",
+        image: "assets/korean/20260613_223536.jpg",
+        isKorean: true
+    },
+    {
+        id: "korean-jewelry-64",
+        name: "Spiral Gold Wire Ring",
+        category: "selling",
+        price: "",
+        description: "Exquisite, unique, and imported Korean jewelry piece. Featuring premium finishes and elegant design.",
+        image: "assets/korean/20260613_223636.jpg",
+        isKorean: true
+    },
+    {
+        id: "korean-jewelry-65",
+        name: "Petal Drop Choker",
+        category: "selling",
+        price: "",
+        description: "Exquisite, unique, and imported Korean jewelry piece. Featuring premium finishes and elegant design.",
+        image: "assets/korean/20260613_223710.jpg",
+        isKorean: true
+    },
+    {
+        id: "korean-jewelry-66",
+        name: "Korean Crystal Chain Bracelet",
+        category: "selling",
+        price: "",
+        description: "Exquisite, unique, and imported Korean jewelry piece. Featuring premium finishes and elegant design.",
+        image: "assets/korean/20260613_223724.jpg",
+        isKorean: true
     }
 ];
 

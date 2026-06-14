@@ -340,21 +340,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const renderCatalog = (tabType) => {
         catalogGrid.innerHTML = '';
-
+        
         if (tabType === 'makeup' || tabType === 'beautician') {
             const filteredServices = services.filter(service => service.type === tabType);
-
+            
             filteredServices.forEach((service, index) => {
                 const card = document.createElement('div');
                 card.className = 'card service-card';
                 card.style.opacity = '0';
                 card.style.transform = 'translateY(20px)';
-                card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-                card.style.transitionDelay = `${index * 0.05}s`;
-
+                card.style.transition = `opacity 0.5s ease ${index * 0.05}s, transform 0.5s ease ${index * 0.05}s`;
+                
                 const enquiryMessage = `Hi Neha, I would like to book the "${service.title}" service in Hyderabad. Please share your availability and quote details. Thank you!`;
                 const waUrl = generateWhatsAppUrl(enquiryMessage);
-
+                
                 card.innerHTML = `
                     <div class="s-header">
                         <div class="s-icon">${service.icon}</div>
@@ -370,77 +369,90 @@ document.addEventListener('DOMContentLoaded', () => {
                         </a>
                     </div>
                 `;
-
+                
                 catalogGrid.appendChild(card);
-
-                setTimeout(() => {
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                }, 50);
             });
-
+            
         } else {
             const filteredJewelry = jewelry.filter(item => item.category === (tabType === 'jewelry-rent' ? 'renting' : 'selling'));
-
+            
             filteredJewelry.forEach((item, index) => {
                 const card = document.createElement('div');
                 card.className = 'card product-card';
                 card.style.opacity = '0';
                 card.style.transform = 'translateY(20px)';
-                card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-                card.style.transitionDelay = `${index * 0.05}s`;
-
-                let actionText = 'Enquire Purchasing';
+                card.style.transition = `opacity 0.5s ease ${index * 0.04}s, transform 0.5s ease ${index * 0.04}s`;
+                
                 let actionBadge = 'Available for Sale';
-                let priceHtml = '';
-
-                if (item.category === 'selling') {
-                    priceHtml = `<span class="p-price-tag"><span class="original-price">₹500</span> ₹250</span>`;
-                } else if (item.price) {
-                    priceHtml = `<span class="p-price-tag">${item.price}</span>`;
-                }
-
+                
                 if (item.category === 'renting') {
-                    actionText = 'Enquire Renting';
                     actionBadge = 'Available for Rent';
                 } else if (item.isKorean) {
-                    actionText = 'Enquire Availability';
                     actionBadge = 'Unique Design';
                 }
-
-                const whatsappMessage = item.isKorean
-                    ? `Hi Neha, I am interested in the unique Korean jewelry piece "${item.image}". Please let me know its availability! Thank you.`
-                    : `Hi Neha, I am interested in the jewelry item "${item.image}" listed under ${item.category === 'renting' ? 'Renting' : 'Selling'}. Can you please share more details? Thanks!`;
-
+                
+                const whatsappMessage = item.isKorean 
+                    ? `Hi Neha, I am interested in the unique Korean jewelry piece "${item.name}". Please let me know its availability! Thank you.`
+                    : `Hi Neha, I am interested in the jewelry item "${item.name}" listed under ${item.category === 'renting' ? 'Renting' : 'Selling'}. Can you please share more details? Thanks!`;
+                    
                 const waUrl = generateWhatsAppUrl(whatsappMessage);
-
-                card.innerHTML = `
-                    <div class="p-img-container" onclick="openLightbox('${item.image}', '${item.name}', '${waUrl}')" style="cursor: pointer;">
-                        <img src="${item.image}" alt="${item.name}" class="p-img" loading="lazy">
-                        <span class="p-badge">${actionBadge}</span>
-                        ${priceHtml}
-                    </div>
-                    <div class="p-details">
-                        <h3 class="p-name">${item.name}</h3>
-                        <p class="p-desc">${item.description}</p>
-                        <div class="p-action">
-                            <a href="${waUrl}" target="_blank" class="btn btn-primary" id="btn-wa-product-${item.id}">
-                                ${actionText} <i data-lucide="message-circle"></i>
+                
+                // Different layout for selling (WhatsApp on top, price at bottom) vs renting
+                if (item.category === 'selling') {
+                    card.innerHTML = `
+                        <div class="p-img-container" onclick="openLightbox('${item.image}', '${item.name}', '${waUrl}')" style="cursor: pointer;">
+                            <img src="${item.image}" alt="${item.name}" class="p-img" loading="lazy">
+                            <span class="p-badge">${actionBadge}</span>
+                            <a href="${waUrl}" target="_blank" class="card-wa-float" onclick="event.stopPropagation()" aria-label="Enquire on WhatsApp">
+                                <i data-lucide="message-circle"></i>
                             </a>
                         </div>
-                    </div>
-                `;
-
+                        <div class="p-details">
+                            <h3 class="p-name">${item.name}</h3>
+                            <p class="p-desc">${item.description}</p>
+                            <div class="p-bottom-price">
+                                <span class="p-offer-price"><span class="original-price">₹500</span> ₹250</span>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Renting cards - keep existing layout with price tag and full button
+                    let priceHtml = item.price ? `<span class="p-price-tag">${item.price}</span>` : '';
+                    
+                    card.innerHTML = `
+                        <div class="p-img-container" onclick="openLightbox('${item.image}', '${item.name}', '${waUrl}')" style="cursor: pointer;">
+                            <img src="${item.image}" alt="${item.name}" class="p-img" loading="lazy">
+                            <span class="p-badge">${actionBadge}</span>
+                            ${priceHtml}
+                        </div>
+                        <div class="p-details">
+                            <h3 class="p-name">${item.name}</h3>
+                            <p class="p-desc">${item.description}</p>
+                            <div class="p-action">
+                                <a href="${waUrl}" target="_blank" class="btn btn-primary" id="btn-wa-product-${item.id}">
+                                    Enquire Renting <i data-lucide="message-circle"></i>
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                }
+                
                 catalogGrid.appendChild(card);
-
-                setTimeout(() => {
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                }, 50);
             });
         }
-
+        
         lucide.createIcons();
+        
+        // Trigger card animations reliably using rAF (fixes blank on mobile first load)
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                const cards = catalogGrid.querySelectorAll('.card');
+                cards.forEach(card => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                });
+            });
+        });
     };
 
     // --- Page Initialization ---
