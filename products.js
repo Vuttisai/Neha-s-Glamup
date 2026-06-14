@@ -587,15 +587,6 @@ const jewelry = [
         isKorean: true
     },
     {
-        id: "korean-jewelry-46",
-        name: "Delicate Moon Earrings",
-        category: "selling",
-        price: "",
-        description: "Exquisite, unique, and imported Korean jewelry piece. Featuring premium finishes and elegant design.",
-        image: "assets/korean/20260613_221839.jpg",
-        isKorean: true
-    },
-    {
         id: "korean-jewelry-47",
         name: "Baroque Pearl Necklace",
         category: "selling",

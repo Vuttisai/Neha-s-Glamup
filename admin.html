@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Neha's GlamUp</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- CSS -->
+    <link rel="stylesheet" href="admin-styles.css">
+</head>
+<body>
+    <!-- Auth Screen -->
+    <div id="auth-screen" class="auth-overlay">
+        <div class="auth-card">
+            <h1 class="auth-title">Neha's GlamUp</h1>
+            <p class="auth-subtitle">Administration Portal</p>
+            <form id="auth-form" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="passcode">Admin Passcode</label>
+                    <input type="password" id="passcode" required placeholder="Enter passcode" autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Verify Access <i data-lucide="shield-check"></i></button>
+                <p id="auth-error" class="error-text hidden">Invalid passcode. Please try again.</p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Admin Layout (Initially hidden if not authenticated) -->
+    <div id="admin-layout" class="layout-container hidden">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-circle">N</div>
+                <div class="sidebar-title-group">
+                    <h2 class="sidebar-brand">Neha's GlamUp</h2>
+                    <span class="sidebar-role">Admin Console</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" onclick="switchSection('dashboard', event)">
+                    <i data-lucide="layout-dashboard"></i> Dashboard
+                </a>
+                <a href="#" class="nav-item" onclick="switchSection('jewelry', event)">
+                    <i data-lucide="gem"></i> Jewelry Catalog
+                </a>
+                <a href="#" class="nav-item" onclick="switchSection('services', event)">
+                    <i data-lucide="sparkles"></i> Salon Services
+                </a>
+                <a href="/" class="nav-item exit-link">
+                    <i data-lucide="external-link"></i> Go to Live Site
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="btn btn-logout" onclick="handleLogout()">
+                    <i data-lucide="log-out"></i> Log Out
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="content-header">
+                <div class="header-title-group">
+                    <h1 id="page-title">Dashboard Overview</h1>
+                    <p id="page-subtitle" class="text-muted">Quick insights and operational controls.</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-gold" onclick="openAddModal()">
+                        <i data-lucide="plus-circle"></i> Add New Product
+                    </button>
+                </div>
+            </header>
+
+            <!-- Dashboard Analytics Panel -->
+            <section id="section-dashboard" class="admin-section">
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-icon gold"><i data-lucide="gem"></i></div>
+                        <div class="metric-data">
+                            <h3 class="metric-value" id="val-total-jewelry">-</h3>
+                            <p class="metric-label">Total Jewelry Items</p>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon"><i data-lucide="shopping-bag"></i></div>
+                        <div class="metric-data">
+                            <h3 class="metric-value" id="val-selling-jewelry">-</h3>
+                            <p class="metric-label">Jewelry for Sale (₹250 Offer)</p>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon"><i data-lucide="calendar"></i></div>
+                        <div class="metric-data">
+                            <h3 class="metric-value" id="val-renting-jewelry">-</h3>
+                            <p class="metric-label">Jewelry for Rent</p>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon rose"><i data-lucide="sparkles"></i></div>
+                        <div class="metric-data">
+                            <h3 class="metric-value" id="val-total-services">-</h3>
+                            <p class="metric-label">Active Services</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent items grid -->
+                <div class="panel-section">
+                    <div class="panel-header">
+                        <h2>Quick Activity</h2>
+                        <span class="badge badge-gold">Live Catalog Status</span>
+                    </div>
+                    <div class="panel-body">
+                        <p class="activity-text">Local server is dynamically synchronizing changes with <code>products.json</code> and generating <code>products.js</code> for instant deployment compatibility.</p>
+                        <div class="action-shortcuts">
+                            <button class="btn btn-secondary" onclick="switchSection('jewelry')">Manage Jewelry <i data-lucide="arrow-right"></i></button>
+                            <button class="btn btn-secondary" onclick="switchSection('services')">Manage Services <i data-lucide="arrow-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Items Catalog Panel -->
+            <section id="section-catalog" class="admin-section hidden">
+                <div class="toolbar">
+                    <div class="search-box">
+                        <i data-lucide="search" class="search-icon"></i>
+                        <input type="text" id="search-input" placeholder="Search by name, ID or description..." oninput="handleSearch()">
+                    </div>
+                    <div class="filter-group" id="category-filters">
+                        <!-- Filled dynamically -->
+                    </div>
+                </div>
+
+                <!-- Data Table -->
+                <div class="table-container">
+                    <table class="admin-table">
+                        <thead>
+                            <tr id="table-headers">
+                                <!-- Filled dynamically -->
+                            </tr>
+                        </thead>
+                        <tbody id="catalog-list">
+                            <!-- Filled dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="no-items-msg" class="empty-state hidden">
+                    <i data-lucide="inbox"></i>
+                    <p>No products found matching filters.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Add/Edit Modal -->
+    <div id="product-modal" class="modal-overlay hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2 id="modal-title">Add New Product</h2>
+                <button class="modal-close-btn" onclick="closeModal()"><i data-lucide="x"></i></button>
+            </div>
+            <form id="product-form" onsubmit="handleFormSubmit(event)">
+                <input type="hidden" id="form-item-id">
+                
+                <div class="form-group">
+                    <label for="form-type">Product Type</label>
+                    <select id="form-type" onchange="toggleFormFields()" required>
+                        <option value="jewelry">Jewelry Item</option>
+                        <option value="service">Salon/Spa Service</option>
+                    </select>
+                </div>
+
+                <!-- Jewelry Fields -->
+                <div id="jewelry-fields-group">
+                    <div class="form-row">
+                        <div class="form-group col-6">
+                            <label for="form-jewelry-name">Jewelry Name</label>
+                            <input type="text" id="form-jewelry-name" placeholder="e.g. Kundan Choker Necklace">
+                        </div>
+                        <div class="form-group col-6">
+                            <label for="form-jewelry-category">Category</label>
+                            <select id="form-jewelry-category">
+                                <option value="selling">For Sale (Selling)</option>
+                                <option value="renting">For Rent (Renting)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-6">
+                            <label for="form-jewelry-price">Price Tag / Rent Text</label>
+                            <input type="text" id="form-jewelry-price" placeholder="e.g. Rent: ₹1,500 / day">
+                            <span class="field-hint">For Selling items, default price is set as ₹250 (struck ₹500).</span>
+                        </div>
+                        <div class="form-group col-6 checkbox-group">
+                            <label class="checkbox-container">
+                                <input type="checkbox" id="form-jewelry-korean">
+                                <span class="checkmark"></span>
+                                Is Unique Korean Design?
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Jewelry Image</label>
+                        <div class="file-drop-zone" id="image-drop-zone" onclick="triggerImageInput()">
+                            <i data-lucide="image" class="upload-icon"></i>
+                            <p class="drop-text" id="upload-label">Drag & drop jewelry photo or click to browse</p>
+                            <input type="file" id="form-jewelry-image" class="hidden" accept="image/*" onchange="previewSelectedImage(event)">
+                        </div>
+                        <div id="image-preview-container" class="image-preview-wrapper hidden">
+                            <img id="image-preview" src="" alt="Selected Preview">
+                            <button type="button" class="btn-remove-preview" onclick="removeImagePreview(event)"><i data-lucide="trash-2"></i> Remove</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Service Fields -->
+                <div id="service-fields-group" class="hidden">
+                    <div class="form-row">
+                        <div class="form-group col-6">
+                            <label for="form-service-title">Service Title</label>
+                            <input type="text" id="form-service-title" placeholder="e.g. Gold Facial Luxury">
+                        </div>
+                        <div class="form-group col-6">
+                            <label for="form-service-category">Category Tab</label>
+                            <select id="form-service-category">
+                                <option value="Skincare & Salon">Beautician (Skincare & Salon)</option>
+                                <option value="Bridal & Ceremonial">Makeup (Bridal & Ceremonial)</option>
+                                <option value="Pre-Wedding">Makeup (Pre-Wedding)</option>
+                                <option value="Occasions">Makeup (Occasions)</option>
+                                <option value="Specialized Techniques">Makeup (Specialized Techniques)</option>
+                                <option value="Styling Services">Makeup (Styling Services)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="form-service-icon">Service Icon / Emoji</label>
+                        <input type="text" id="form-service-icon" placeholder="e.g. 💆‍♀️ or ✨">
+                    </div>
+                </div>
+
+                <!-- Common Description Field -->
+                <div class="form-group">
+                    <label for="form-description">Description</label>
+                    <textarea id="form-description" rows="3" placeholder="Provide description text details..."></textarea>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="btn-save-submit">Save Product <i data-lucide="save"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="admin-script.js"></script>
+</body>
+</html>
