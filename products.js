@@ -136,19 +136,19 @@ const services = [
         type: "beautician"
     },
     {
-        id: "nourishing-hairspa",
-        title: "Nourishing Hair Spa",
+        id: "oiling-hair",
+        title: "Oiling Hair Treatment",
         category: "Skincare & Salon",
-        description: "Deep hair conditioning and massage treatment to restore shine, lock in moisture, and repair dry or damaged hair.",
-        icon: "💇‍♀️",
+        description: "Relaxing warm oil massage therapy for your scalp and hair using premium herbal oils. Nourishes roots, promotes growth, and adds natural shine.",
+        icon: "🧴",
         type: "beautician"
     },
     {
-        id: "threading-waxing",
-        title: "Threading & Waxing",
+        id: "henna-services",
+        title: "Henna Services",
         category: "Skincare & Salon",
-        description: "Grooming essentials including gentle facial threading and highly hygienic body waxing to leave your skin soft and smooth.",
-        icon: "🧴",
+        description: "Beautiful, rich henna application for hands and feet. From traditional bridal patterns to trendy Arabic and Indo-Western designs with long-lasting color.",
+        icon: "🌿",
         type: "beautician"
     }
 ];

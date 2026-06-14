@@ -918,49 +918,75 @@ img {
     transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.gallery-overlay {
+/* Gallery floating WhatsApp button */
+.gallery-wa-btn {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(11, 11, 11, 0.7);
+    top: 14px;
+    right: 14px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #25D366;
+    color: #ffffff;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    opacity: 0;
+    z-index: 5;
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
     transition: var(--transition-smooth);
-    gap: 12px;
+    opacity: 0.85;
 }
 
-.gallery-icon {
-    color: var(--gold-primary);
-    width: 32px;
-    height: 32px;
-    transform: translateY(10px);
-    transition: var(--transition-smooth);
+.gallery-wa-btn i {
+    width: 20px;
+    height: 20px;
 }
 
-.gallery-overlay span {
+.gallery-wa-btn:hover {
+    transform: scale(1.15);
+    opacity: 1;
+    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
+}
+
+.gallery-item:hover .gallery-wa-btn {
+    opacity: 1;
+}
+
+/* Gallery bottom info bar */
+.gallery-bottom-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 14px 18px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.5) 60%, transparent 100%);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    z-index: 3;
+    pointer-events: none;
+}
+
+.gallery-label {
     font-family: var(--font-serif);
-    font-size: 1.25rem;
-    color: var(--text-primary);
-    transform: translateY(10px);
-    transition: var(--transition-smooth);
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: #ffffff;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.gallery-price {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--gold-secondary);
+    background: rgba(0, 0, 0, 0.5);
+    padding: 4px 10px;
+    border-radius: 4px;
+    letter-spacing: 0.3px;
 }
 
 .gallery-item:hover .gallery-img {
     transform: scale(1.08);
-}
-
-.gallery-item:hover .gallery-overlay {
-    opacity: 1;
-}
-
-.gallery-item:hover .gallery-icon,
-.gallery-item:hover .gallery-overlay span {
-    transform: translateY(0);
 }
 
 /* Lightbox Modal */
@@ -1482,6 +1508,30 @@ a.value:hover {
         height: 280px;
     }
 
+    .gallery-wa-btn {
+        width: 40px;
+        height: 40px;
+        top: 10px;
+        right: 10px;
+    }
+
+    .gallery-wa-btn i {
+        width: 18px;
+        height: 18px;
+    }
+
+    .gallery-bottom-bar {
+        padding: 12px 14px;
+    }
+
+    .gallery-label {
+        font-size: 0.95rem;
+    }
+
+    .gallery-price {
+        font-size: 0.75rem;
+    }
+
     /* Contact section */
     .contact-card {
         padding: 24px 18px;
@@ -1661,6 +1711,31 @@ a.value:hover {
 
     .gallery-item {
         height: 240px;
+    }
+
+    .gallery-wa-btn {
+        width: 36px;
+        height: 36px;
+        top: 8px;
+        right: 8px;
+    }
+
+    .gallery-wa-btn i {
+        width: 16px;
+        height: 16px;
+    }
+
+    .gallery-bottom-bar {
+        padding: 10px 12px;
+    }
+
+    .gallery-label {
+        font-size: 0.85rem;
+    }
+
+    .gallery-price {
+        font-size: 0.7rem;
+        padding: 3px 8px;
     }
 
     .contact-card {
