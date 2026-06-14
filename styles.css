@@ -340,12 +340,12 @@ img {
     background-color: var(--bg-secondary);
     border-bottom: 1px solid var(--border-color);
     z-index: 999;
-    overflow: hidden;
+    overflow-y: auto;
     transition: height 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .mobile-drawer.open {
-    height: 320px;
+    height: 395px;
 }
 
 .mobile-nav {
@@ -1338,6 +1338,10 @@ a.value:hover {
         font-size: 2rem;
     }
     
+    .nav-container {
+        padding: 0 16px;
+    }
+
     .tab-container {
         flex-wrap: wrap;
         gap: 10px;
@@ -1348,10 +1352,6 @@ a.value:hover {
         justify-content: center;
         padding: 10px 16px;
         font-size: 0.85rem;
-    }
-    
-    .tab-btn:first-child {
-        flex: 1 1 100%;
     }
     
     .catalog-grid {
