@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Neha's GlamUp - Certified Professional Makeup Artist in Hyderabad. Offering Bridal, Engagement, Reception, Haldi, and Party Makeup services, along with premium jewelry renting and selling. Home service available.">
+    <meta name="keywords"
+        content="Makeup Artist Hyderabad, Bridal Makeup Hyderabad, Saree Draping Hyderabad, Jewelry Renting Hyderabad, Professional Hairstyles Hyderabad, Neha GlamUp">
+    <meta name="author" content="Neha's GlamUp">
+    <meta property="og:title" content="Neha's GlamUp – Flawless Makeup & Premium Accessories">
+    <meta property="og:description"
+        content="Certified Professional Makeup Artist in Hyderabad. Accepts bookings for Bridal, Party, HD & Airbrush Makeup. Rent or buy gorgeous wedding jewelry.">
+    <meta property="og:image" content="assets/logo.jpg">
+    <meta property="og:url" content="https://nehasglamup.com">
+    <title>Neha's GlamUp – Certified Professional Makeup Artist & Jewelry | Hyderabad</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
+        rel="stylesheet">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <!-- Header / Navbar -->
+    <header class="navbar-header" id="header">
+        <div class="nav-container">
+            <a href="#home" class="logo-link" id="nav-logo-link">
+                <img src="assets/logo.jpg" alt="Neha's GlamUp Logo" class="nav-logo">
+                <span class="brand-name">Neha's <span class="gold-text">GlamUp</span></span>
+            </a>
+
+            <nav class="nav-menu" id="nav-menu">
+                <a href="#home" class="nav-item active" id="link-home">Home</a>
+                <a href="#about" class="nav-item" id="link-about">About</a>
+                <a href="#korean-jewel" class="nav-item" id="link-korean-jewel">Korean Jewelry</a>
+                <a href="#catalog" class="nav-item" id="link-catalog">Services & Catalog</a>
+                <a href="#gallery" class="nav-item" id="link-gallery">Gallery</a>
+                <a href="#contact" class="nav-item" id="link-contact">Contact</a>
+            </nav>
+
+            <div class="nav-right">
+                <a href="https://wa.me/917337480803" target="_blank" class="btn btn-primary btn-nav-cta"
+                    id="btn-quick-book">
+                    <i data-lucide="phone"></i> Book Now
+                </a>
+                <button class="menu-toggle" id="menu-toggle" aria-label="Toggle Navigation Menu">
+                    <i data-lucide="menu" class="icon-menu"></i>
+                    <i data-lucide="x" class="icon-close"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Drawer Menu -->
+    <div class="mobile-drawer" id="mobile-drawer">
+        <nav class="mobile-nav">
+            <a href="#home" class="mobile-nav-item" id="mob-link-home">Home</a>
+            <a href="#about" class="mobile-nav-item" id="mob-link-about">About</a>
+            <a href="#korean-jewel" class="mobile-nav-item" id="mob-link-korean-jewel">Korean Jewelry</a>
+            <a href="#catalog" class="mobile-nav-item" id="mob-link-catalog">Services & Catalog</a>
+            <a href="#gallery" class="mobile-nav-item" id="mob-link-gallery">Gallery</a>
+            <a href="#contact" class="mobile-nav-item" id="mob-link-contact">Contact</a>
+            <a href="https://wa.me/917337480803" target="_blank" class="btn btn-primary mob-cta-btn" id="mob-btn-book">
+                <i data-lucide="message-square"></i> Book Appointment
+            </a>
+        </nav>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero-section" id="home">
+        <div class="hero-bg-overlay"></div>
+        <div class="hero-container">
+            <div class="hero-content fade-in-up">
+                <div class="hero-badge">
+                    <span class="gold-text"><i data-lucide="award"></i> Certified Professional Makeup Artist</span>
+                </div>
+                <h1 class="hero-title">Neha's <span class="gold-text text-glow">GlamUp</span></h1>
+                <p class="hero-caption">From Flawless Makeup to Perfect Accessories, We've Got Your Glam Covered. 💄</p>
+                <p class="hero-description">Experience luxurious bridal makeovers, customized party looks, and
+                    professional saree draping in Hyderabad. We also offer premium bridal jewelry sets for rent and sale
+                    to complete your perfect look.</p>
+                <div class="hero-buttons">
+                    <a href="#catalog" class="btn btn-primary btn-lg" id="hero-btn-services">
+                        Our Services <i data-lucide="arrow-right"></i>
+                    </a>
+                    <a href="#catalog" class="btn btn-outline btn-lg" id="hero-btn-jewelry"
+                        onclick="switchTab('jewelry-rent')">
+                        Rent Jewelry <i data-lucide="gem"></i>
+                    </a>
+                </div>
+
+                <div class="hero-quick-features">
+                    <div class="q-feature"><i data-lucide="check-circle" class="gold-text"></i> Premium Products</div>
+                    <div class="q-feature"><i data-lucide="shield-check" class="gold-text"></i> 100% Hygienic</div>
+                    <div class="q-feature"><i data-lucide="map-pin" class="gold-text"></i> Home Service</div>
+                </div>
+            </div>
+
+            <div class="hero-image-container fade-in-up delay-200">
+                <div class="image-frame-gold">
+                    <img src="assets/owner.jpg" alt="Neha - Certified Makeup Artist" class="hero-owner-img">
+                    <div class="experience-card">
+                        <span class="exp-number">MUA</span>
+                        <span class="exp-text">Neha<br>GlamUp</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about-section" id="about">
+        <div class="container">
+            <div class="section-header text-center scroll-animate">
+                <span class="sub-title gold-text">Meet the Artist</span>
+                <h2 class="section-title">Flawless Artistry, Tailored For You</h2>
+                <div class="heading-divider"></div>
+            </div>
+
+            <div class="about-grid">
+                <div class="about-text-content scroll-animate">
+                    <h3>Accepting Bookings in Hyderabad</h3>
+                    <p class="lead-text">Congratulations on your upcoming event! As a certified professional makeup
+                        artist, I believe every occasion deserves a distinct and customized look that highlights your
+                        natural beauty.</p>
+
+                    <p>We provide a premium, hygienic, and personalized beauty experience using top-tier international
+                        cosmetic brands. Whether you need a royal bridal transformation, a soft glow for your
+                        engagement, or perfectly draped sarees, we ensure you look stunning from every angle.</p>
+
+                    <div class="features-list">
+                        <div class="feature-item">
+                            <div class="feature-icon"><i data-lucide="sparkles"></i></div>
+                            <div class="feature-info">
+                                <h4>Customized Looks for Every Occasion</h4>
+                                <p>No cookie-cutter looks. We customize contouring, eye styles, and finishes to suit
+                                    your skin type, outfit, and theme.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon"><i data-lucide="home"></i></div>
+                            <div class="feature-info">
+                                <h4>Home & Venue Services Available</h4>
+                                <p>Skip the salon rush. We bring the luxury studio experience directly to your home or
+                                    wedding venue in Hyderabad.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon"><i data-lucide="sparkles"></i></div>
+                            <div class="feature-info">
+                                <h4>Premium & High-End Products</h4>
+                                <p>We only use authentic, long-lasting, and dermatologist-approved products to keep your
+                                    skin healthy and glowing.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="about-cta-container">
+                        <a href="https://wa.me/917337480803" class="btn btn-primary" id="btn-about-chat">
+                            <i data-lucide="message-circle"></i> Chat on WhatsApp
+                        </a>
+                        <a href="#catalog" class="btn btn-text" id="btn-about-catalog">View Catalog <i
+                                data-lucide="chevron-right"></i></a>
+                    </div>
+                </div>
+
+                <div class="about-metrics scroll-animate delay-200">
+                    <div class="metric-card">
+                        <div class="metric-icon"><i data-lucide="heart" class="gold-text"></i></div>
+                        <h3>Certified</h3>
+                        <p>Professional Makeup Artist</p>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon"><i data-lucide="map-pin" class="gold-text"></i></div>
+                        <h3>Home Service</h3>
+                        <p>Hyderabad & Venue Bookings</p>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon"><i data-lucide="gem" class="gold-text"></i></div>
+                        <h3>Jewelry Renting</h3>
+                        <p>Complete Wedding Accessories</p>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon"><span class="gold-text"
+                                style="font-size: 1.6rem; display: flex; align-items: center; justify-content: center;">💆‍♀️</span>
+                        </div>
+                        <h3>Beautician Care</h3>
+                        <p>Facials, Skincare & Grooming</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Highlighted Korean Jewelry Slider Section -->
+    <section class="slider-section" id="korean-jewel">
+        <div class="container">
+            <div class="section-header text-center scroll-animate">
+                <span class="sub-title gold-text">Exclusive Showcase</span>
+                <h2 class="section-title">Unique Korean Jewelry</h2>
+                <p class="section-desc">Explore our handpicked collection of imported, unique Korean jewelry. Exquisite,
+                    one-of-a-kind designs. Click to view high-resolution and enquire details.</p>
+                <div class="heading-divider"></div>
+            </div>
+
+            <div class="slider-wrapper scroll-animate">
+                <button class="slider-arrow prev" id="slider-prev-btn" aria-label="Previous Slide">
+                    <i data-lucide="chevron-left"></i>
+                </button>
+
+                <div class="slider-container-outer">
+                    <div class="slider-container" id="korean-slider">
+                        <!-- Dynamic Slide Items will be injected via JS -->
+                    </div>
+                </div>
+
+                <button class="slider-arrow next" id="slider-next-btn" aria-label="Next Slide">
+                    <i data-lucide="chevron-right"></i>
+                </button>
+            </div>
+
+            <div class="slider-dots" id="slider-dots-container">
+                <!-- Dots injected via JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Dynamic Services & Products Catalog Section -->
+    <section class="catalog-section" id="catalog">
+        <div class="container">
+            <div class="section-header text-center scroll-animate">
+                <span class="sub-title gold-text">Explore Our Offerings</span>
+                <h2 class="section-title">Services & Jewelry Catalog</h2>
+                <p class="section-desc">Choose from our professional makeup and salon services: <em>Beauty from inner
+                        with flawless glam</em>. Or browse our premium jewelry collections.</p>
+                <div class="heading-divider"></div>
+            </div>
+
+            <!-- Tab Switcher -->
+            <div class="tab-container scroll-animate">
+                <button class="tab-btn active" id="tab-makeup" onclick="switchTab('makeup')">
+                    <i data-lucide="sparkles"></i> Makeup Artistry
+                </button>
+                <button class="tab-btn" id="tab-beautician" onclick="switchTab('beautician')">
+                    <span
+                        style="font-size: 1.1rem; line-height: 1; display: inline-flex; align-items: center;">💆‍♀️</span>
+                    Beautician Services
+                </button>
+                <button class="tab-btn" id="tab-jewelry-rent" onclick="switchTab('jewelry-rent')">
+                    <i data-lucide="gem"></i> Jewelry for Rent
+                </button>
+                <button class="tab-btn" id="tab-jewelry-sale" onclick="switchTab('jewelry-sale')">
+                    <i data-lucide="shopping-bag"></i> Jewelry for Sale
+                </button>
+            </div>
+
+            <!-- Grid Container -->
+            <div class="catalog-grid scroll-animate" id="catalog-grid">
+                <!-- Dynamic Content Injected Here via JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Image Gallery -->
+    <section class="gallery-section" id="gallery">
+        <div class="container">
+            <div class="section-header text-center scroll-animate">
+                <span class="sub-title gold-text">Our Creations</span>
+                <h2 class="section-title">Glamour Gallery</h2>
+                <p class="section-desc">Glimpses of bridal transformations, professional hair styling, and premium
+                    jewelry designs.</p>
+                <div class="heading-divider"></div>
+            </div>
+
+            <div class="gallery-grid scroll-animate">
+                <div class="gallery-item" onclick="openLightbox('assets/owner.jpg', 'Bridal Styling')">
+                    <img src="assets/owner.jpg" alt="Makeup Look 1" class="gallery-img">
+                    <div class="gallery-overlay">
+                        <i data-lucide="eye" class="gallery-icon"></i>
+                        <span>Bridal Styling</span>
+                    </div>
+                </div>
+                <div class="gallery-item"
+                    onclick="openLightbox('assets/jewelry_kundan_set.jpg', 'Royal Kundan Bridal Set')">
+                    <img src="assets/jewelry_kundan_set.jpg" alt="Royal Kundan Jewelry" class="gallery-img">
+                    <div class="gallery-overlay">
+                        <i data-lucide="eye" class="gallery-icon"></i>
+                        <span>Kundan Jewelry</span>
+                    </div>
+                </div>
+                <div class="gallery-item"
+                    onclick="openLightbox('assets/jewelry_temple_haram.jpg', 'Temple Gold Haram')">
+                    <img src="assets/jewelry_temple_haram.jpg" alt="Temple Gold Jewelry" class="gallery-img">
+                    <div class="gallery-overlay">
+                        <i data-lucide="eye" class="gallery-icon"></i>
+                        <span>Temple Gold Haram</span>
+                    </div>
+                </div>
+                <div class="gallery-item"
+                    onclick="openLightbox('assets/jewelry_guttapusalu.jpg', 'Antique Guttapusalu Choker')">
+                    <img src="assets/jewelry_guttapusalu.jpg" alt="Antique Guttapusalu Jewelry" class="gallery-img">
+                    <div class="gallery-overlay">
+                        <i data-lucide="eye" class="gallery-icon"></i>
+                        <span>Guttapusalu Jewelry</span>
+                    </div>
+                </div>
+                <div class="gallery-item"
+                    onclick="openLightbox('assets/jewelry_cz_bangles.jpg', 'Sparkling CZ Stone Bangles')">
+                    <img src="assets/jewelry_cz_bangles.jpg" alt="Cubic Zirconia Bangles" class="gallery-img">
+                    <div class="gallery-overlay">
+                        <i data-lucide="eye" class="gallery-icon"></i>
+                        <span>CZ Bangles Set</span>
+                    </div>
+                </div>
+                <div class="gallery-item"
+                    onclick="openLightbox('assets/jewelry_polki_jhumkas.jpg', 'Luxury Polki Jhumkas')">
+                    <img src="assets/jewelry_polki_jhumkas.jpg" alt="Polki Pearl Jhumkas" class="gallery-img">
+                    <div class="gallery-overlay">
+                        <i data-lucide="eye" class="gallery-icon"></i>
+                        <span>Polki Jhumkas</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lightbox Modal -->
+    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+        <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+        <div class="lightbox-content" onclick="event.stopPropagation()">
+            <img src="" alt="" id="lightbox-img">
+            <p id="lightbox-caption"></p>
+            <a href="" target="_blank" class="btn btn-primary" id="lightbox-wa-btn"
+                style="margin-top: 10px; display: none;">
+                Enquire on WhatsApp <i data-lucide="message-circle"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Contact & Map Section -->
+    <section class="contact-section" id="contact">
+        <div class="container">
+            <div class="section-header text-center scroll-animate">
+                <span class="sub-title gold-text">Get in Touch</span>
+                <h2 class="section-title">Book Your Glam Slot</h2>
+                <p class="section-desc">Have questions or want to secure your booking? Reach out directly via call or
+                    social platforms.</p>
+                <div class="heading-divider"></div>
+            </div>
+
+            <div class="contact-grid">
+                <!-- Contact info card -->
+                <div class="contact-info scroll-animate">
+                    <div class="contact-card">
+                        <div class="c-logo-container">
+                            <img src="assets/logo.jpg" alt="Neha's GlamUp Logo" class="contact-logo">
+                        </div>
+                        <h3>Neha's GlamUp</h3>
+                        <p class="tagline">From Flawless Makeup to Perfect Accessories, We've Got Your Glam Covered.</p>
+
+                        <div class="c-details">
+                            <div class="c-detail-item">
+                                <div class="c-icon"><i data-lucide="phone-call" class="gold-text"></i></div>
+                                <div class="c-text">
+                                    <p class="label">Bookings & Enquiries</p>
+                                    <a href="tel:+917337480803" class="value">+91 7337480803</a>
+                                </div>
+                            </div>
+                            <div class="c-detail-item">
+                                <div class="c-icon"><i data-lucide="phone" class="gold-text"></i></div>
+                                <div class="c-text">
+                                    <p class="label">Alternate Contact</p>
+                                    <a href="tel:+919515388234" class="value">+91 9515388234</a>
+                                </div>
+                            </div>
+                            <div class="c-detail-item">
+                                <div class="c-icon"><i data-lucide="map-pin" class="gold-text"></i></div>
+                                <div class="c-text">
+                                    <p class="label">Service Area</p>
+                                    <p class="value">Hyderabad, India (Home Services & Venue Bookings)</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="social-links-title">Follow and Connect:</div>
+                        <div class="social-buttons">
+                            <a href="https://instagram.com/neha__glam_up" target="_blank" class="social-btn instagram"
+                                aria-label="Instagram Profile" id="insta-profile-link">
+                                <i data-lucide="instagram"></i> Instagram
+                            </a>
+                            <a href="https://maps.app.goo.gl/g2vBx69riW3V24J49" target="_blank"
+                                class="social-btn google" aria-label="Google Business Profile" id="google-profile-link">
+                                <i data-lucide="map"></i> Google Business
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Google Map Embed & Hours -->
+                <div class="contact-map scroll-animate delay-200">
+                    <div class="map-container">
+                        <!-- Stylized Embed Map of Hyderabad -->
+                        <iframe
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3807.2681087620576!2d78.36945759999999!3d17.3989164!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb953dd822b013%3A0xbf78943446929124!2sNehaGlamUp!5e0!3m2!1sen!2sin!4v1781422999168!5m2!1sen!2sin"
+                            width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    </div>
+                    <div class="booking-notice">
+                        <i data-lucide="info" class="gold-text"></i>
+                        <p><strong>Note:</strong> We recommend booking your slots at least 2-3 weeks in advance for
+                            weddings and large family celebrations to guarantee availability.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer-bar">
+        <div class="container text-center">
+            <p>&copy; 2026 Neha's GlamUp. All Rights Reserved.</p>
+            <p class="footer-subtext">Certified Professional Makeup Artist & Premium Jewelry Rentals in Hyderabad.</p>
+        </div>
+    </footer>
+
+    <!-- Products Data -->
+    <script src="products.js"></script>
+
+    <!-- Script Logic -->
+    <script src="script.js"></script>
+
+</body>
+
+</html>
