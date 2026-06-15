@@ -15,7 +15,7 @@ function createIconsSafely() {
     }
 }
 // Default categories in case backend connection fails
-let jewelryCategories = [
+let dynamicCategories = typeof jewelryCategories !== 'undefined' ? jewelryCategories : [
     "bracelet", 
     "choker", 
     "anklet", 
@@ -102,7 +102,7 @@ async function fetchCategories() {
         if (res.ok) {
             const data = await res.json();
             if (Array.isArray(data) && data.length > 0) {
-                jewelryCategories = data;
+                dynamicCategories = data;
                 console.log('Loaded dynamic jewelry categories from API');
             }
         }
@@ -120,7 +120,7 @@ function renderFilterTabs() {
     let html = `<button class="filter-tab ${activeCategory === 'all' ? 'active' : ''}" data-filter="all" onclick="filterCategory('all')">All Collections</button>`;
     html += `<button class="filter-tab ${activeCategory === 'korean' ? 'active' : ''}" data-filter="korean" onclick="filterCategory('korean')">Korean Showcase</button>`;
     
-    jewelryCategories.forEach(cat => {
+    dynamicCategories.forEach(cat => {
         const isActive = activeCategory.toLowerCase() === cat.toLowerCase();
         const label = cat.charAt(0).toUpperCase() + cat.slice(1);
         html += `<button class="filter-tab ${isActive ? 'active' : ''}" data-filter="${cat}" onclick="filterCategory('${cat}')">${label}</button>`;
