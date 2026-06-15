@@ -4,6 +4,16 @@ let searchQuery = '';
 let activeCategory = 'all';
 let activeSort = 'default';
 
+// Safe helper to create Lucide icons without throwing errors if the CDN library fails to load or is blocked
+function createIconsSafely() {
+    if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') {
+        try {
+            lucide.createIcons();
+        } catch (err) {
+            console.warn('Failed to render Lucide icons:', err);
+        }
+    }
+}
 // Default categories in case backend connection fails
 let jewelryCategories = [
     "bracelet", 
@@ -19,7 +29,7 @@ let jewelryCategories = [
 
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize Lucide Icons
-    lucide.createIcons();
+    createIconsSafely();
 
     // Sticky navbar behavior
     const header = document.getElementById('header');
@@ -288,7 +298,7 @@ function renderGrid() {
         grid.appendChild(card);
     });
 
-    lucide.createIcons();
+    createIconsSafely();
 
     // Trigger grid items transition using animation frames
     requestAnimationFrame(() => {
@@ -403,7 +413,7 @@ function showToast(message, type = 'info') {
     `;
     
     container.appendChild(toast);
-    lucide.createIcons();
+    createIconsSafely();
     
     setTimeout(() => {
         toast.style.transform = 'translateX(100px)';

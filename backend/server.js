@@ -65,8 +65,8 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve uploads statically
-app.use('/assets/uploads', express.static(path.join(__dirname, 'assets', 'uploads')));
+// Serve all assets statically (including uploads, korean, and pre-packaged assets)
+app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
 // Serve admin panel statically at /admin
 app.use('/admin', express.static(path.join(__dirname, 'admin')));

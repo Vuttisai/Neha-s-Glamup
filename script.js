@@ -5,8 +5,19 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 
+    // Safe helper to create Lucide icons without throwing errors if the CDN library fails to load or is blocked
+    function createIconsSafely() {
+        if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') {
+            try {
+                lucide.createIcons();
+            } catch (err) {
+                console.warn('Failed to render Lucide icons:', err);
+            }
+        }
+    }
+
     // Initialize Lucide Icons
-    lucide.createIcons();
+    createIconsSafely();
 
     // --- Global Configurations ---
     const WHATSAPP_NUMBER = "917337480803"; // Primary bookings number
@@ -191,7 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
             catalogGrid.appendChild(card);
         });
         
-        lucide.createIcons();
+        createIconsSafely();
         
         // Trigger animations reliably
         requestAnimationFrame(() => {
