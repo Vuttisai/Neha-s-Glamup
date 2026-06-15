@@ -322,6 +322,11 @@ app.delete('/api/products/:id', adminAuth, (req, res) => {
     }
 });
 
+// Health check for deployment monitoring
+app.get('/api/health', (req, res) => {
+    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 // Start Server
 app.listen(PORT, () => {
     console.log(`========================================`);

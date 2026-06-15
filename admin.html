@@ -30,6 +30,14 @@
         </div>
     </div>
 
+    <!-- Hamburger Menu Button (Mobile) -->
+    <button id="hamburger-btn" class="hamburger-btn hidden" onclick="toggleSidebar()" aria-label="Toggle menu">
+        <i data-lucide="menu"></i>
+    </button>
+
+    <!-- Sidebar Backdrop (Mobile) -->
+    <div id="sidebar-backdrop" class="sidebar-backdrop" onclick="closeSidebar()"></div>
+
     <!-- Main Admin Layout (Initially hidden if not authenticated) -->
     <div id="admin-layout" class="layout-container hidden">
         <!-- Sidebar -->
@@ -150,6 +158,9 @@
                         </tbody>
                     </table>
                 </div>
+                <!-- Mobile Cards (shown on mobile instead of table) -->
+                <div id="mobile-cards" class="mobile-cards-container"></div>
+
                 <div id="no-items-msg" class="empty-state hidden">
                     <i data-lucide="inbox"></i>
                     <p>No products found matching filters.</p>
@@ -261,6 +272,20 @@
                     <button type="submit" class="btn btn-primary" id="btn-save-submit">Save Product <i data-lucide="save"></i></button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Image Lightbox Overlay -->
+    <div id="image-lightbox" class="lightbox-overlay" onclick="closeLightboxOutside(event)">
+        <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+        <div class="lightbox-content">
+            <img id="lightbox-img" class="lightbox-img" src="" alt="Full-size preview" draggable="false">
+        </div>
+        <div class="lightbox-controls">
+            <button class="lightbox-zoom-btn" onclick="zoomLightbox(-1)" title="Zoom Out">&#8722;</button>
+            <span class="lightbox-zoom-level" id="zoom-level">100%</span>
+            <button class="lightbox-zoom-btn" onclick="zoomLightbox(1)" title="Zoom In">&#43;</button>
+            <button class="lightbox-zoom-btn" onclick="resetLightboxZoom()" title="Reset Zoom">&#8634;</button>
         </div>
     </div>
 

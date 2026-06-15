@@ -4,6 +4,15 @@ let currentSection = 'dashboard';
 let currentCategoryFilter = 'all';
 let searchQuery = '';
 let selectedImageFile = null;
+let searchDebounceTimer = null;
+
+// Lightbox state
+let lightboxZoom = 1;
+let lightboxPanX = 0;
+let lightboxPanY = 0;
+let lightboxDragging = false;
+let lightboxDragStartX = 0;
+let lightboxDragStartY = 0;
 
 // Initial Setup
 document.addEventListener('DOMContentLoaded', () => {
@@ -38,7 +47,91 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // Lightbox keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+        const lightbox = document.getElementById('image-lightbox');
+        if (!lightbox.classList.contains('active')) return;
+        
+        if (e.key === 'Escape') closeLightbox();
+        if (e.key === '+' || e.key === '=') zoomLightbox(1);
+        if (e.key === '-') zoomLightbox(-1);
+        if (e.key === '0') resetLightboxZoom();
+    });
+
+    // Lightbox touch pinch-to-zoom
+    const lightboxImg = document.getElementById('lightbox-img');
+    if (lightboxImg) {
+        let initialPinchDistance = 0;
+        let initialZoom = 1;
+
+        lightboxImg.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 2) {
+                e.preventDefault();
+                initialPinchDistance = getPinchDistance(e.touches);
+                initialZoom = lightboxZoom;
+            } else if (e.touches.length === 1 && lightboxZoom > 1) {
+                lightboxDragging = true;
+                lightboxDragStartX = e.touches[0].clientX - lightboxPanX;
+                lightboxDragStartY = e.touches[0].clientY - lightboxPanY;
+            }
+        }, { passive: false });
+
+        lightboxImg.addEventListener('touchmove', (e) => {
+            if (e.touches.length === 2) {
+                e.preventDefault();
+                const currentDistance = getPinchDistance(e.touches);
+                const scale = currentDistance / initialPinchDistance;
+                lightboxZoom = Math.max(0.5, Math.min(5, initialZoom * scale));
+                applyLightboxTransform();
+            } else if (e.touches.length === 1 && lightboxDragging && lightboxZoom > 1) {
+                e.preventDefault();
+                lightboxPanX = e.touches[0].clientX - lightboxDragStartX;
+                lightboxPanY = e.touches[0].clientY - lightboxDragStartY;
+                applyLightboxTransform();
+            }
+        }, { passive: false });
+
+        lightboxImg.addEventListener('touchend', () => {
+            lightboxDragging = false;
+        });
+
+        // Mouse drag for desktop
+        lightboxImg.addEventListener('mousedown', (e) => {
+            if (lightboxZoom > 1) {
+                lightboxDragging = true;
+                lightboxDragStartX = e.clientX - lightboxPanX;
+                lightboxDragStartY = e.clientY - lightboxPanY;
+                e.preventDefault();
+            }
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (lightboxDragging) {
+                lightboxPanX = e.clientX - lightboxDragStartX;
+                lightboxPanY = e.clientY - lightboxDragStartY;
+                applyLightboxTransform();
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            lightboxDragging = false;
+        });
+
+        // Mouse wheel zoom
+        lightboxImg.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? -1 : 1;
+            zoomLightbox(delta);
+        }, { passive: false });
+    }
 });
+
+function getPinchDistance(touches) {
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+}
 
 // Get auth passcode from localStorage
 function getPasscode() {
@@ -77,11 +170,13 @@ async function checkAuth() {
 function showAuthScreen() {
     document.getElementById('auth-screen').classList.remove('hidden');
     document.getElementById('admin-layout').classList.add('hidden');
+    document.getElementById('hamburger-btn').classList.add('hidden');
 }
 
 function hideAuthScreen() {
     document.getElementById('auth-screen').classList.add('hidden');
     document.getElementById('admin-layout').classList.remove('hidden');
+    document.getElementById('hamburger-btn').classList.remove('hidden');
 }
 
 // Handle Admin authentication form submission
@@ -115,8 +210,79 @@ async function handleLogin(e) {
 function handleLogout() {
     localStorage.removeItem('glamup_admin_passcode');
     showAuthScreen();
+    closeSidebar();
     showToast('Logged out successfully.', 'info');
 }
+
+// =============================================
+// SIDEBAR TOGGLE (Mobile)
+// =============================================
+function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    sidebar.classList.toggle('open');
+    backdrop.classList.toggle('active');
+}
+
+function closeSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    sidebar.classList.remove('open');
+    backdrop.classList.remove('active');
+}
+
+// =============================================
+// IMAGE LIGHTBOX
+// =============================================
+function openLightbox(src) {
+    const overlay = document.getElementById('image-lightbox');
+    const img = document.getElementById('lightbox-img');
+    img.src = src;
+    lightboxZoom = 1;
+    lightboxPanX = 0;
+    lightboxPanY = 0;
+    applyLightboxTransform();
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox() {
+    const overlay = document.getElementById('image-lightbox');
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+function closeLightboxOutside(e) {
+    if (e.target === e.currentTarget || e.target.classList.contains('lightbox-content')) {
+        closeLightbox();
+    }
+}
+
+function zoomLightbox(direction) {
+    lightboxZoom = Math.max(0.5, Math.min(5, lightboxZoom + direction * 0.3));
+    if (lightboxZoom <= 1) {
+        lightboxPanX = 0;
+        lightboxPanY = 0;
+    }
+    applyLightboxTransform();
+}
+
+function resetLightboxZoom() {
+    lightboxZoom = 1;
+    lightboxPanX = 0;
+    lightboxPanY = 0;
+    applyLightboxTransform();
+}
+
+function applyLightboxTransform() {
+    const img = document.getElementById('lightbox-img');
+    img.style.transform = `scale(${lightboxZoom}) translate(${lightboxPanX / lightboxZoom}px, ${lightboxPanY / lightboxZoom}px)`;
+    document.getElementById('zoom-level').textContent = Math.round(lightboxZoom * 100) + '%';
+}
+
+// =============================================
+// DATA MANAGEMENT
+// =============================================
 
 // Fetch all catalog products from the database
 async function loadProducts() {
@@ -201,6 +367,9 @@ function switchSection(section, event) {
         setupFilters(['All Services', 'Makeup Artistry', 'Beautician Services']);
         renderTable();
     }
+
+    // Close sidebar on mobile after navigation
+    closeSidebar();
 }
 
 // Render dynamic toolbar categories filters
@@ -232,19 +401,26 @@ function setupFilters(tabs) {
     });
 }
 
-// Live search input
+// Debounced search input
 function handleSearch() {
-    searchQuery = document.getElementById('search-input').value.toLowerCase().trim();
-    renderTable();
+    clearTimeout(searchDebounceTimer);
+    searchDebounceTimer = setTimeout(() => {
+        searchQuery = document.getElementById('search-input').value.toLowerCase().trim();
+        renderTable();
+    }, 250);
 }
 
-// Render the grid / catalog list based on selections
+// =============================================
+// TABLE & CARD RENDERING
+// =============================================
 function renderTable() {
     const listBody = document.getElementById('catalog-list');
     const tableHeaders = document.getElementById('table-headers');
     const emptyState = document.getElementById('no-items-msg');
+    const mobileCards = document.getElementById('mobile-cards');
     
     listBody.innerHTML = '';
+    mobileCards.innerHTML = '';
     
     let items = [];
     
@@ -284,23 +460,26 @@ function renderTable() {
         if (items.length === 0) {
             emptyState.classList.remove('hidden');
             document.querySelector('.table-container').classList.add('hidden');
+            mobileCards.innerHTML = '';
         } else {
             emptyState.classList.add('hidden');
             document.querySelector('.table-container').classList.remove('hidden');
             
             items.forEach(item => {
+                // Desktop table row
                 const tr = document.createElement('tr');
                 const isKoreanLabel = item.isKorean 
                     ? `<span class="badge badge-gold"><i data-lucide="check" style="width:12px;height:12px;"></i> Yes</span>` 
                     : `<span class="text-muted">No</span>`;
                 
                 let priceDisplay = '';
-                const originalText = item.originalPrice ? `<span class="original-price">₹${item.originalPrice}</span> ` : '';
-                const mainPriceText = item.price ? (item.price.toString().startsWith('Rent:') || item.price.toString().includes('₹') ? item.price : `₹${item.price}`) : 'Not Set';
+                const originalText = item.originalPrice ? `<span class="original-price">\u20b9${item.originalPrice}</span> ` : '';
+                const mainPriceText = item.price ? (item.price.toString().startsWith('Rent:') || item.price.toString().includes('\u20b9') ? item.price : `\u20b9${item.price}`) : 'Not Set';
                 priceDisplay = `<span class="item-price">${originalText}${mainPriceText}</span>`;
 
+                const escapedImage = (item.image || '').replace(/'/g, "\\'");
                 tr.innerHTML = `
-                    <td><img src="${item.image}" class="table-img" alt="${item.name}"></td>
+                    <td><img src="${item.image}" class="table-img" alt="${item.name}" onclick="openLightbox('${escapedImage}')"></td>
                     <td><strong>${item.name}</strong><br><span class="text-muted" style="font-size:0.75rem;">${item.id}</span></td>
                     <td><span class="item-badge ${item.category}">${item.category === 'selling' ? 'Sale' : 'Rent'}</span></td>
                     <td>${priceDisplay}</td>
@@ -314,6 +493,27 @@ function renderTable() {
                     </td>
                 `;
                 listBody.appendChild(tr);
+
+                // Mobile card
+                const card = document.createElement('div');
+                card.className = 'mobile-card';
+                card.innerHTML = `
+                    <img src="${item.image}" class="mobile-card-img" alt="${item.name}" onclick="openLightbox('${escapedImage}')">
+                    <div class="mobile-card-body">
+                        <div class="mobile-card-name">${item.name}</div>
+                        <div class="mobile-card-meta">
+                            <span class="item-badge ${item.category}">${item.category === 'selling' ? 'Sale' : 'Rent'}</span>
+                            ${priceDisplay}
+                            ${item.isKorean ? '<span class="badge badge-gold" style="font-size:0.7rem;">Korean</span>' : ''}
+                        </div>
+                        ${item.description ? `<div class="mobile-card-desc">${item.description}</div>` : ''}
+                        <div class="mobile-card-actions">
+                            <button class="btn btn-secondary btn-sm" onclick="openEditModal('jewelry', '${item.id}')"><i data-lucide="edit-3" style="width:14px;height:14px;"></i> Edit</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteProduct('${item.id}')"><i data-lucide="trash-2" style="width:14px;height:14px;"></i></button>
+                        </div>
+                    </div>
+                `;
+                mobileCards.appendChild(card);
             });
         }
         
@@ -349,11 +549,13 @@ function renderTable() {
         if (items.length === 0) {
             emptyState.classList.remove('hidden');
             document.querySelector('.table-container').classList.add('hidden');
+            mobileCards.innerHTML = '';
         } else {
             emptyState.classList.add('hidden');
             document.querySelector('.table-container').classList.remove('hidden');
             
             items.forEach(item => {
+                // Desktop table row
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td><div class="table-icon">${item.icon || '🌸'}</div></td>
@@ -369,6 +571,26 @@ function renderTable() {
                     </td>
                 `;
                 listBody.appendChild(tr);
+
+                // Mobile card
+                const card = document.createElement('div');
+                card.className = 'mobile-card';
+                card.innerHTML = `
+                    <div class="mobile-card-icon">${item.icon || '🌸'}</div>
+                    <div class="mobile-card-body">
+                        <div class="mobile-card-name">${item.title}</div>
+                        <div class="mobile-card-meta">
+                            <span class="item-badge ${item.type}">${item.type === 'makeup' ? 'Makeup' : 'Beautician'}</span>
+                            <span class="badge badge-gold" style="font-size:0.7rem;">${item.category}</span>
+                        </div>
+                        ${item.description ? `<div class="mobile-card-desc">${item.description}</div>` : ''}
+                        <div class="mobile-card-actions">
+                            <button class="btn btn-secondary btn-sm" onclick="openEditModal('service', '${item.id}')"><i data-lucide="edit-3" style="width:14px;height:14px;"></i> Edit</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteProduct('${item.id}')"><i data-lucide="trash-2" style="width:14px;height:14px;"></i></button>
+                        </div>
+                    </div>
+                `;
+                mobileCards.appendChild(card);
             });
         }
     }
@@ -376,7 +598,9 @@ function renderTable() {
     lucide.createIcons();
 }
 
-// Modal handling logic
+// =============================================
+// MODAL HANDLING
+// =============================================
 function openAddModal() {
     resetForm();
     document.getElementById('modal-title').textContent = 'Add New Product';
@@ -530,7 +754,9 @@ function removeImagePreview(event) {
     input.required = !itemId;
 }
 
-// Handle Add/Edit Form submission
+// =============================================
+// FORM SUBMISSION (Optimistic Updates)
+// =============================================
 async function handleFormSubmit(e) {
     e.preventDefault();
     
@@ -588,7 +814,7 @@ async function handleFormSubmit(e) {
     const saveButton = document.getElementById('btn-save-submit');
     const originalText = saveButton.innerHTML;
     saveButton.disabled = true;
-    saveButton.textContent = 'Saving details...';
+    saveButton.innerHTML = '<span class="btn-spinner"></span> Saving...';
     
     try {
         const res = await fetch(url, {
@@ -601,9 +827,32 @@ async function handleFormSubmit(e) {
         
         if (res.ok) {
             const result = await res.json();
-            showToast(isEdit ? 'Product details updated successfully.' : 'New product created successfully.', 'success');
+            
+            // Optimistic update — apply the returned item directly to local state
+            if (type === 'jewelry') {
+                if (isEdit) {
+                    const idx = allProducts.jewelry.findIndex(j => j.id === id);
+                    if (idx !== -1) allProducts.jewelry[idx] = result.item;
+                } else {
+                    allProducts.jewelry.push(result.item);
+                }
+            } else {
+                if (isEdit) {
+                    const idx = allProducts.services.findIndex(s => s.id === id);
+                    if (idx !== -1) allProducts.services[idx] = result.item;
+                } else {
+                    allProducts.services.push(result.item);
+                }
+            }
+
+            updateDashboardMetrics();
+            showToast(isEdit ? 'Product updated successfully!' : 'New product added!', 'success');
             closeModal();
-            loadProducts();
+            
+            // Re-render the current view with local data (instant, no network)
+            if (currentSection !== 'dashboard') {
+                renderTable();
+            }
         } else {
             const err = await res.json();
             showToast(err.error || 'Server returned an error.', 'error');
@@ -613,12 +862,15 @@ async function handleFormSubmit(e) {
     } finally {
         saveButton.disabled = false;
         saveButton.innerHTML = originalText;
+        lucide.createIcons();
     }
 }
 
-// Delete a product item
+// =============================================
+// DELETE (Optimistic)
+// =============================================
 async function deleteProduct(id) {
-    if (!confirm('Are you sure you want to permanently delete this product? This will also remove any uploaded images associated with it.')) {
+    if (!confirm('Are you sure you want to permanently delete this product?')) {
         return;
     }
     
@@ -631,8 +883,23 @@ async function deleteProduct(id) {
         });
         
         if (res.ok) {
-            showToast('Product successfully deleted.', 'success');
-            loadProducts();
+            // Optimistic delete from local state
+            const jIdx = allProducts.jewelry.findIndex(j => j.id === id);
+            if (jIdx !== -1) {
+                allProducts.jewelry.splice(jIdx, 1);
+            } else {
+                const sIdx = allProducts.services.findIndex(s => s.id === id);
+                if (sIdx !== -1) {
+                    allProducts.services.splice(sIdx, 1);
+                }
+            }
+
+            updateDashboardMetrics();
+            showToast('Product deleted.', 'success');
+            
+            if (currentSection !== 'dashboard') {
+                renderTable();
+            }
         } else {
             const err = await res.json();
             showToast(err.error || 'Failed to delete product.', 'error');
@@ -642,7 +909,9 @@ async function deleteProduct(id) {
     }
 }
 
-// Trigger visual Toast notifications
+// =============================================
+// TOAST NOTIFICATIONS
+// =============================================
 function showToast(message, type = 'info') {
     const container = document.getElementById('toast-container');
     
