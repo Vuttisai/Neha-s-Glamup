@@ -7,6 +7,16 @@ let selectedImageFile = null;
 let searchDebounceTimer = null;
 let adminSession = null; // { token, user: { name, email, picture } }
 
+// Helper to resolve admin image path (relative to root domain instead of /admin/)
+function resolveAdminImageUrl(imagePath) {
+    if (!imagePath) return '';
+    if (imagePath.startsWith('assets/')) {
+        return '/' + imagePath;
+    }
+    return imagePath;
+}
+
+
 // Lightbox state
 let lightboxZoom = 1;
 let lightboxPanX = 0;
@@ -580,10 +590,11 @@ function renderTable() {
                 const originalText = item.originalPrice ? `<span class="original-price">\u20b9${item.originalPrice}</span> ` : '';
                 const mainPriceText = item.price ? (item.price.toString().startsWith('Rent:') || item.price.toString().includes('\u20b9') ? item.price : `\u20b9${item.price}`) : 'Not Set';
                 const priceDisplay = `<span class="item-price">${originalText}${mainPriceText}</span>`;
-                const escapedImage = (item.image || '').replace(/'/g, "\\'");
+                const resolvedImage = resolveAdminImageUrl(item.image);
+                const escapedImage = resolvedImage.replace(/'/g, "\\'");
 
                 tr.innerHTML = `
-                    <td><img src="${item.image}" class="table-img" alt="${item.name}" onclick="openLightbox('${escapedImage}')"></td>
+                    <td><img src="${resolvedImage}" class="table-img" alt="${item.name}" onclick="openLightbox('${escapedImage}')"></td>
                     <td><strong>${item.name}</strong><br><span class="text-muted" style="font-size:0.75rem;">${item.id}</span></td>
                     <td><span class="item-badge ${item.category}">${item.category === 'selling' ? 'Sale' : 'Rent'}</span></td>
                     <td>${priceDisplay}</td>
@@ -601,7 +612,7 @@ function renderTable() {
                 const card = document.createElement('div');
                 card.className = 'mobile-card';
                 card.innerHTML = `
-                    <img src="${item.image}" class="mobile-card-img" alt="${item.name}" onclick="openLightbox('${escapedImage}')">
+                    <img src="${resolvedImage}" class="mobile-card-img" alt="${item.name}" onclick="openLightbox('${escapedImage}')">
                     <div class="mobile-card-body">
                         <div class="mobile-card-name">${item.name}</div>
                         <div class="mobile-card-meta">
@@ -741,7 +752,7 @@ function openEditModal(type, id) {
                 const previewImg = document.getElementById('image-preview');
                 const previewContainer = document.getElementById('image-preview-container');
                 const label = document.getElementById('upload-label');
-                previewImg.src = item.image;
+                previewImg.src = resolveAdminImageUrl(item.image);
                 previewContainer.classList.remove('hidden');
                 label.textContent = "Uploaded jewelry image is set";
             }
