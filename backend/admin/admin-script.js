@@ -280,7 +280,9 @@ async function handleGoogleCredential(response) {
 function onAuthSuccess() {
     hideAuthScreen();
     updateAdminProfile();
-    loadProducts();
+    loadJewelryCategories().then(() => {
+        loadProducts();
+    });
 }
 
 // Update sidebar with admin's profile
@@ -459,20 +461,23 @@ function switchSection(section, event) {
         pageSubtitle.textContent = 'Quick insights and operational controls.';
         dbSection.classList.remove('hidden');
         catalogSection.classList.add('hidden');
+        document.getElementById('btn-manage-categories').style.display = 'none';
         updateDashboardMetrics();
     } else if (section === 'jewelry') {
         pageTitle.textContent = 'Jewelry Showcase';
         pageSubtitle.textContent = 'Manage inventory of items available for rent and sale.';
         dbSection.classList.add('hidden');
         catalogSection.classList.remove('hidden');
-        setupFilters(['All Jewelry', 'For Sale (Selling)', 'For Rent (Renting)', 'Korean Showcase']);
+        document.getElementById('btn-manage-categories').style.display = 'block';
+        setupFilters(['All Jewelry', 'Korean Showcase', ...jewelryCategories]);
         renderTable();
     } else if (section === 'services') {
         pageTitle.textContent = 'Salon Services';
         pageSubtitle.textContent = 'Add, modify, or remove skincare, facials, and makeup artistry services.';
         dbSection.classList.add('hidden');
         catalogSection.classList.remove('hidden');
-        setupFilters(['All Services', 'Makeup Artistry', 'Beautician Services']);
+        document.getElementById('btn-manage-categories').style.display = 'none';
+        setupFilters(['All Services', 'Makeup Artistry', 'Beautician Services', 'Mehendi Designs']);
         renderTable();
     }
 
@@ -487,12 +492,12 @@ function setupFilters(tabs) {
         const btn = document.createElement('button');
         btn.className = `filter-tab ${index === 0 ? 'active' : ''}`;
         
-        let filterKey = 'all';
-        if (tab.includes('Sale') || tab.includes('Selling')) filterKey = 'selling';
-        else if (tab.includes('Rent') || tab.includes('Renting')) filterKey = 'renting';
+        let filterKey = tab.toLowerCase();
+        if (tab.includes('All Jewelry') || tab.includes('All Services')) filterKey = 'all';
         else if (tab.includes('Korean')) filterKey = 'korean';
         else if (tab.includes('Makeup')) filterKey = 'makeup';
         else if (tab.includes('Beautician')) filterKey = 'beautician';
+        else if (tab.includes('Mehendi')) filterKey = 'mehendi';
         
         btn.textContent = tab;
         btn.onclick = () => {
@@ -703,6 +708,7 @@ function openAddModal() {
         formType.value = 'service';
     } else {
         formType.value = 'jewelry';
+        populateJewelryCategorySelect();
     }
     
     toggleFormFields();
@@ -721,6 +727,7 @@ function openEditModal(type, id) {
     formType.disabled = true;
     
     if (type === 'jewelry') {
+        populateJewelryCategorySelect();
         const item = allProducts.jewelry.find(item => item.id === id);
         if (item) {
             document.getElementById('form-jewelry-name').value = item.name;
@@ -1005,4 +1012,138 @@ function showToast(message, type = 'info') {
         toast.style.transition = 'all 0.3s ease';
         setTimeout(() => toast.remove(), 300);
     }, 4000);
+}
+
+// =============================================
+// JEWELRY CATEGORIES MANAGEMENT LOGIC
+// =============================================
+let jewelryCategories = [];
+
+// Fetch categories on load
+async function loadJewelryCategories() {
+    try {
+        const res = await fetch('/api/jewelry-categories');
+        if (res.ok) {
+            jewelryCategories = await res.json();
+            populateJewelryCategorySelect();
+        }
+    } catch (err) {
+        console.error('Failed to load categories', err);
+    }
+}
+
+// Populate the select dropdown in the add/edit form
+function populateJewelryCategorySelect() {
+    const select = document.getElementById('form-jewelry-category');
+    if (!select) return;
+    
+    // Clear and build options dynamically
+    select.innerHTML = '';
+    jewelryCategories.forEach(cat => {
+        const opt = document.createElement('option');
+        opt.value = cat;
+        opt.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+        select.appendChild(opt);
+    });
+}
+
+// Open categories modal
+function openCategoriesModal() {
+    const modal = document.getElementById('categories-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        renderCategoriesEditList();
+    }
+}
+
+// Close categories modal
+function closeCategoriesModal() {
+    const modal = document.getElementById('categories-modal');
+    if (modal) modal.classList.add('hidden');
+}
+
+// Render the edit list inside the modal
+function renderCategoriesEditList() {
+    const container = document.getElementById('categories-list-items');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    jewelryCategories.forEach((cat, index) => {
+        const div = document.createElement('div');
+        div.className = 'categories-edit-item';
+        div.innerHTML = `
+            <span>${cat.charAt(0).toUpperCase() + cat.slice(1)}</span>
+            <button type="button" onclick="deleteJewelryCategory(${index})" title="Delete category">
+                <i data-lucide="trash-2" style="width:16px;height:16px;"></i>
+            </button>
+        `;
+        container.appendChild(div);
+    });
+    
+    lucide.createIcons();
+}
+
+// Add a category
+async function addJewelryCategory() {
+    const input = document.getElementById('new-category-input');
+    const val = input.value.trim().toLowerCase();
+    
+    if (!val) {
+        showToast("Please enter a category name.", "error");
+        return;
+    }
+    
+    if (jewelryCategories.includes(val)) {
+        showToast("Category already exists.", "error");
+        return;
+    }
+    
+    jewelryCategories.push(val);
+    input.value = '';
+    
+    await saveJewelryCategories();
+}
+
+// Delete a category
+async function deleteJewelryCategory(index) {
+    if (index < 0 || index >= jewelryCategories.length) return;
+    
+    const cat = jewelryCategories[index];
+    if (!confirm('Are you sure you want to delete the category "' + cat + '"? Products under this category will not be deleted but their category will remain unset.')) return;
+    
+    jewelryCategories.splice(index, 1);
+    await saveJewelryCategories();
+}
+
+// Save categories to server
+async function saveJewelryCategories() {
+    try {
+        const res = await fetch('/api/jewelry-categories', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-admin-session': getSessionToken()
+            },
+            body: JSON.stringify({ categories: jewelryCategories })
+        });
+        
+        if (res.ok) {
+            const data = await res.json();
+            jewelryCategories = data.categories;
+            populateJewelryCategorySelect();
+            renderCategoriesEditList();
+            showToast("Categories updated successfully!", "success");
+            
+            // Re-render filters and catalog if currently looking at jewelry showcase
+            if (currentSection === 'jewelry') {
+                setupFilters(['All Jewelry', 'Korean Showcase', ...jewelryCategories]);
+                renderTable();
+            }
+        } else {
+            const err = await res.json();
+            showToast(err.error || "Failed to save categories.", "error");
+        }
+    } catch (err) {
+        showToast("Network error.", "error");
+    }
 }

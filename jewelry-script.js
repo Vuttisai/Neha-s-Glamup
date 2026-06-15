@@ -4,6 +4,19 @@ let searchQuery = '';
 let activeCategory = 'all';
 let activeSort = 'default';
 
+// Default categories in case backend connection fails
+let jewelryCategories = [
+    "bracelet", 
+    "choker", 
+    "anklet", 
+    "nose pins", 
+    "korean earrings", 
+    "hair accessories", 
+    "buggadi", 
+    "chains for kids", 
+    "rented jewelry"
+];
+
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize Lucide Icons
     lucide.createIcons();
@@ -14,7 +27,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (window.scrollY > 50) {
             header.classList.add('scrolled');
         } else {
-            // Keep scrolled on subpage to maintain readability
             header.classList.add('scrolled');
         }
     });
@@ -51,10 +63,6 @@ document.addEventListener('DOMContentLoaded', () => {
         link.addEventListener('click', closeMobileMenu);
     });
 
-    // Lightbox modal setup
-    const lightbox = document.getElementById('lightbox');
-    const lightboxCopyBtn = document.getElementById('lightbox-copy-btn');
-    
     // Wire escape key for lightbox
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
@@ -62,15 +70,59 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Initial render and data fetch
+    // Initial render, category fetch, and data fetch
     renderGrid();
+    fetchCategories();
     fetchLiveJewelry();
 });
+
+// Helper to resolve backend image paths
+function resolveImageUrl(imagePath) {
+    if (!imagePath) return '';
+    if (imagePath.startsWith('assets/uploads/')) {
+        return `${CONFIG.API_BASE_URL}/${imagePath}`;
+    }
+    return imagePath;
+}
+
+// Fetch categories from backend
+async function fetchCategories() {
+    try {
+        const res = await fetch(`${CONFIG.API_BASE_URL}/api/jewelry-categories`);
+        if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data) && data.length > 0) {
+                jewelryCategories = data;
+                console.log('Loaded dynamic jewelry categories from API');
+            }
+        }
+    } catch (err) {
+        console.log('Server API not running. Using default static jewelry categories.');
+    }
+    renderFilterTabs();
+}
+
+// Render dynamic filter tabs
+function renderFilterTabs() {
+    const wrapper = document.getElementById('filter-tabs-wrapper');
+    if (!wrapper) return;
+    
+    let html = `<button class="filter-tab ${activeCategory === 'all' ? 'active' : ''}" data-filter="all" onclick="filterCategory('all')">All Collections</button>`;
+    html += `<button class="filter-tab ${activeCategory === 'korean' ? 'active' : ''}" data-filter="korean" onclick="filterCategory('korean')">Korean Showcase</button>`;
+    
+    jewelryCategories.forEach(cat => {
+        const isActive = activeCategory.toLowerCase() === cat.toLowerCase();
+        const label = cat.charAt(0).toUpperCase() + cat.slice(1);
+        html += `<button class="filter-tab ${isActive ? 'active' : ''}" data-filter="${cat}" onclick="filterCategory('${cat}')">${label}</button>`;
+    });
+    
+    wrapper.innerHTML = html;
+}
 
 // Fetch live products to prevent browser caching locally
 async function fetchLiveJewelry() {
     try {
-        const res = await fetch('/api/products');
+        const res = await fetch(`${CONFIG.API_BASE_URL}/api/products`);
         if (res.ok) {
             const data = await res.json();
             if (data.jewelry && data.jewelry.length > 0) {
@@ -124,6 +176,7 @@ function renderGrid() {
     const grid = document.getElementById('jewelry-grid');
     const emptyState = document.getElementById('empty-state');
     
+    if (!grid) return;
     grid.innerHTML = '';
     
     let items = [...jewelryData];
@@ -133,7 +186,8 @@ function renderGrid() {
         if (activeCategory === 'korean') {
             items = items.filter(item => item.isKorean === true);
         } else {
-            items = items.filter(item => item.category === activeCategory);
+            // Check if the item category matches the selected category (case-insensitive)
+            items = items.filter(item => (item.category || '').toLowerCase() === activeCategory.toLowerCase());
         }
     }
 
@@ -153,25 +207,25 @@ function renderGrid() {
         items.sort((a, b) => b.name.localeCompare(a.name));
     } else if (activeSort === 'price-asc') {
         items.sort((a, b) => {
-            const priceA = a.category === 'selling' ? parsePrice(a.price || '250') : parsePrice(a.price);
-            const priceB = b.category === 'selling' ? parsePrice(b.price || '250') : parsePrice(b.price);
+            const priceA = parsePrice(a.price);
+            const priceB = parsePrice(b.price);
             return priceA - priceB;
         });
     } else if (activeSort === 'price-desc') {
         items.sort((a, b) => {
-            const priceA = a.category === 'selling' ? parsePrice(a.price || '250') : parsePrice(a.price);
-            const priceB = b.category === 'selling' ? parsePrice(b.price || '250') : parsePrice(b.price);
+            const priceA = parsePrice(a.price);
+            const priceB = parsePrice(b.price);
             return priceB - priceA;
         });
     }
 
     // Toggle Empty State UI
     if (items.length === 0) {
-        emptyState.classList.remove('hidden');
+        if (emptyState) emptyState.classList.remove('hidden');
         grid.style.display = 'none';
         return;
     } else {
-        emptyState.classList.add('hidden');
+        if (emptyState) emptyState.classList.add('hidden');
         grid.style.display = 'grid';
     }
 
@@ -183,20 +237,22 @@ function renderGrid() {
         card.style.transform = 'translateY(25px)';
         card.style.transition = `opacity 0.4s ease ${index * 0.03}s, transform 0.4s ease ${index * 0.03}s`;
 
-        let actionBadge = item.category === 'renting' ? 'Available for Rent' : 'Available for Sale';
+        // Determine if it is a rented item
+        const isRent = (item.category || '').toLowerCase().includes('rent') || (item.category || '').toLowerCase() === 'rented jewelry';
+        let actionBadge = isRent ? 'Available for Rent' : 'Available for Sale';
         if (item.isKorean) {
             actionBadge = 'Unique Design';
         }
 
         const whatsappMessage = item.isKorean 
             ? `Hi Neha, I am interested in the unique Korean jewelry piece "${item.name}". Please let me know its availability! Thank you.`
-            : `Hi Neha, I am interested in the jewelry item "${item.name}" listed under ${item.category === 'renting' ? 'Renting' : 'Selling'}. Can you please share more details? Thanks!`;
+            : `Hi Neha, I am interested in the jewelry item "${item.name}" listed under category "${item.category}". Can you please share more details? Thanks!`;
             
         const waUrl = `https://wa.me/917337480803?text=${encodeURIComponent(whatsappMessage)}`;
 
         // Dynamic price rendering
         let priceHtml = '';
-        if (item.category === 'selling') {
+        if (!isRent) {
             const offerPrice = item.price || '250';
             const originalPrice = item.originalPrice || '500';
             priceHtml = `<span class="original-price">₹${originalPrice}</span> ₹${offerPrice}`;
@@ -206,9 +262,12 @@ function renderGrid() {
             priceHtml = `${originalPrice}${currentPrice}`;
         }
 
+        const imageUrl = resolveImageUrl(item.image);
+        const escapedImage = imageUrl.replace(/'/g, "\\'");
+
         card.innerHTML = `
-            <div class="p-img-container" onclick="openLightbox('${item.image}', '${item.name}', '${waUrl}', '${item.description}')" style="cursor: pointer;">
-                <img src="${item.image}" alt="${item.name}" class="p-img" loading="lazy">
+            <div class="p-img-container" onclick="openLightbox('${escapedImage}', '${item.name}', '${waUrl}', '${item.description}')" style="cursor: pointer;">
+                <img src="${imageUrl}" alt="${item.name}" class="p-img" loading="lazy">
                 <span class="p-badge">${actionBadge}</span>
                 <a href="${waUrl}" target="_blank" class="card-wa-float" onclick="event.stopPropagation()" aria-label="Enquire on WhatsApp">
                     <i data-lucide="message-circle"></i>
@@ -219,7 +278,7 @@ function renderGrid() {
                 <p class="p-desc">${item.description || 'Premium design accessory to elevate your aesthetic appearance.'}</p>
                 <div class="p-bottom-price">
                     <span class="p-offer-price">${priceHtml}</span>
-                    <button class="btn-copy-float" onclick="event.stopPropagation(); copyImageToClipboard('${item.image}')" title="Copy photo to clipboard">
+                    <button class="btn-copy-float" onclick="event.stopPropagation(); copyImageToClipboard('${escapedImage}')" title="Copy photo to clipboard">
                         <i data-lucide="copy"></i> Copy Photo
                     </button>
                 </div>
@@ -297,7 +356,7 @@ async function copyImageToClipboard(imagePath) {
 
         canvas.toBlob(async (blob) => {
             if (!blob) {
-                copyTextToClipboard(window.location.origin + '/' + imagePath, "Could not convert image. Copied link instead!");
+                copyTextToClipboard(imagePath, "Could not convert image. Copied link instead!");
                 return;
             }
             try {
@@ -308,13 +367,13 @@ async function copyImageToClipboard(imagePath) {
                 showToast("Photo copied! You can now paste it directly into WhatsApp.", "success");
             } catch (err) {
                 console.error("ClipboardItem write failed, copying text link:", err);
-                copyTextToClipboard(window.location.origin + '/' + imagePath, "Link copied to clipboard!");
+                copyTextToClipboard(imagePath, "Link copied to clipboard!");
             }
         }, 'image/png');
 
     } catch (err) {
         console.error("Failed to copy image bytes, trying text link copy:", err);
-        copyTextToClipboard(window.location.origin + '/' + imagePath, "Link copied to clipboard!");
+        copyTextToClipboard(imagePath, "Link copied to clipboard!");
     }
 }
 

@@ -26,6 +26,7 @@ const SESSION_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
 // Paths
 const PRODUCTS_JSON_PATH = path.join(__dirname, 'products.json');
 const PRODUCTS_JS_PATH = path.join(__dirname, 'products.js');
+const FRONTEND_PRODUCTS_JS_PATH = path.join(__dirname, '..', 'products.js');
 const UPLOAD_DIR = path.join(__dirname, 'assets', 'uploads');
 
 // Ensure upload directory exists
@@ -64,6 +65,12 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Serve uploads statically
+app.use('/assets/uploads', express.static(path.join(__dirname, 'assets', 'uploads')));
+
+// Serve admin panel statically at /admin
+app.use('/admin', express.static(path.join(__dirname, 'admin')));
+
 // Serve products.js with caching disabled so edits reflect immediately
 app.get('/products.js', (req, res) => {
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
@@ -71,8 +78,8 @@ app.get('/products.js', (req, res) => {
     res.sendFile(path.join(__dirname, 'products.js'));
 });
 
-// Serve frontend static files
-app.use(express.static(__dirname));
+// Serve frontend static files from parent root directory
+app.use(express.static(path.join(__dirname, '..')));
 
 // =============================================
 // SESSION & GOOGLE AUTH
@@ -243,12 +250,22 @@ const services = ${JSON.stringify(data.services, null, 4)};
 
 const jewelry = ${JSON.stringify(data.jewelry, null, 4)};
 
+const jewelryCategories = ${JSON.stringify(data.jewelryCategories || [], null, 4)};
+
 // Export for usage
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { services, jewelry };
+    module.exports = { services, jewelry, jewelryCategories };
 }
 `;
         fs.writeFileSync(PRODUCTS_JS_PATH, productsJsContent, 'utf-8');
+        
+        // 3. Write fallback/local static copy in frontend root folder
+        try {
+            fs.writeFileSync(FRONTEND_PRODUCTS_JS_PATH, productsJsContent, 'utf-8');
+        } catch (err) {
+            console.warn('Could not write static products.js fallback in parent folder:', err.message);
+        }
+        
         return true;
     } catch (err) {
         console.error('Error writing products data:', err);
@@ -276,6 +293,35 @@ const deleteProductImage = (imagePath) => {
 // =============================================
 // API ENDPOINTS
 // =============================================
+
+// Read all jewelry categories (Public endpoint)
+app.get('/api/jewelry-categories', (req, res) => {
+    const data = readProductsData();
+    res.json(data.jewelryCategories || []);
+});
+
+// Update jewelry categories (Admin only)
+app.put('/api/jewelry-categories', adminAuth, (req, res) => {
+    try {
+        const { categories } = req.body;
+        if (!Array.isArray(categories)) {
+            return res.status(400).json({ error: 'Categories must be an array of strings' });
+        }
+        const data = readProductsData();
+        // Clean categories list
+        data.jewelryCategories = categories
+            .map(cat => cat.trim().toLowerCase())
+            .filter(cat => cat.length > 0);
+            
+        if (writeProductsData(data)) {
+            res.json({ success: true, categories: data.jewelryCategories });
+        } else {
+            res.status(500).json({ error: 'Database write error' });
+        }
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
 // Read all products (Public endpoint)
 app.get('/api/products', (req, res) => {
@@ -332,7 +378,12 @@ app.post('/api/products', adminAuth, upload.single('image'), (req, res) => {
                 category,
                 description: description || '',
                 icon,
-                type: category.toLowerCase().includes('makeup') || category.toLowerCase().includes('bridal') ? 'makeup' : 'beautician'
+                type: (() => {
+                    const cat = category.toLowerCase();
+                    if (cat.includes('mehendi') || cat.includes('henna')) return 'mehendi';
+                    if (cat.includes('makeup') || cat.includes('bridal')) return 'makeup';
+                    return 'beautician';
+                })()
             };
             
             data.services.push(newService);
@@ -405,7 +456,12 @@ app.put('/api/products/:id', adminAuth, upload.single('image'), (req, res) => {
                     category: category || oldItem.category,
                     description: description !== undefined ? description : oldItem.description,
                     icon: icon || oldItem.icon,
-                    type: category ? (category.toLowerCase().includes('makeup') || category.toLowerCase().includes('bridal') ? 'makeup' : 'beautician') : oldItem.type
+                    type: category ? (() => {
+                        const cat = category.toLowerCase();
+                        if (cat.includes('mehendi') || cat.includes('henna')) return 'mehendi';
+                        if (cat.includes('makeup') || cat.includes('bridal')) return 'makeup';
+                        return 'beautician';
+                    })() : oldItem.type
                 };
                 
                 if (writeProductsData(data)) {
@@ -471,6 +527,14 @@ app.delete('/api/products/:id', adminAuth, (req, res) => {
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
+
+// Initialize database generation on startup
+try {
+    writeProductsData(readProductsData());
+    console.log(`✅ Dynamically generated products.js and fallback files on startup`);
+} catch (err) {
+    console.error(`⚠️ Failed to generate products.js at startup:`, err.message);
+}
 
 // Start Server
 app.listen(PORT, () => {

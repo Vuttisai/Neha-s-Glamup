@@ -1,6 +1,6 @@
 # Deploying Neha's GlamUp Backend to Render
 
-Step-by-step guide to deploy the Node.js backend (admin dashboard + API) to Render's free tier.
+Step-by-step guide to deploy the Node.js backend (admin dashboard + API) from the `/backend` subfolder to Render's free tier.
 
 ---
 
@@ -19,7 +19,7 @@ Step-by-step guide to deploy the Node.js backend (admin dashboard + API) to Rend
 ```bash
 git init
 git add .
-git commit -m "Initial commit"
+git commit -m "Configure codebase separation"
 git branch -M main
 git remote add origin https://github.com/YOUR_USERNAME/nehas-glamup.git
 git push -u origin main
@@ -32,45 +32,47 @@ git push -u origin main
 1. Go to [dashboard.render.com](https://dashboard.render.com)
 2. Click **"New" → "Web Service"**
 3. Connect your GitHub repository
-4. Configure:
+4. Configure the settings:
 
-   | Setting           | Value                          |
-   | ----------------- | ------------------------------ |
-   | **Name**          | `nehas-glamup`                 |
-   | **Region**        | Singapore (closest to India)   |
-   | **Branch**        | `main`                         |
-   | **Runtime**       | Node                           |
-   | **Build Command** | `npm install`                  |
-   | **Start Command** | `npm start`                    |
-   | **Instance Type** | Free                           |
+   | Setting | Value | Description |
+   |---|---|---|
+   | **Name** | `nehas-glamup` | Service identifier |
+   | **Region** | Singapore | Closest region to India |
+   | **Branch** | `main` | Production code branch |
+   | **Root Directory** | `backend` | **[CRITICAL] Tells Render to build from the /backend subfolder** |
+   | **Runtime** | `Node` | Execution environment |
+   | **Build Command** | `npm install` | Installs backend dependencies |
+   | **Start Command** | `npm start` | Runs the Express server |
+   | **Instance Type** | Free | Free tier hosting |
 
 ---
 
 ## Step 3: Set Environment Variables
 
-In Render dashboard → Your service → **Environment**, add:
+In Render dashboard → Your service → **Environment**, add the variables:
 
-| Variable         | Value                                          |
-| ---------------- | ---------------------------------------------- |
-| `ADMIN_PASSCODE` | Your secret admin password (change from default!) |
-| `PORT`           | `10000` (Render's default)                     |
-| `NODE_ENV`       | `production`                                   |
+| Variable | Value | Purpose |
+|---|---|---|
+| `GOOGLE_CLIENT_ID` | `298848968214-mgtjrff8lj51b2st8vimemmeomis510d.apps.googleusercontent.com` | Google Cloud OAuth ID |
+| `ADMIN_EMAIL` | `sk1779504@gmail.com,another-email@gmail.com` | Comma-separated list of authorized Gmails |
+| `PORT` | `10000` (Render's default) | Server port |
+| `NODE_ENV` | `production` | Run environment |
 
 ---
 
 ## Step 4: Deploy
 
 1. Click **"Create Web Service"**
-2. Render will automatically build and deploy
+2. Render will automatically build and deploy from the `/backend` folder.
 3. Wait for the status to show **"Live"**
 4. Your backend URL will be: `https://nehas-glamup.onrender.com`
 
 ---
 
-## Step 5: Access Your Admin Panel
+## Step 5: Access Your Admin Panel & Site
 
-- **Admin Dashboard**: `https://nehas-glamup.onrender.com/admin.html`
-- **Live Website**: `https://nehas-glamup.onrender.com/`
+- **Admin Dashboard**: `https://nehas-glamup.onrender.com/admin/`
+- **Live Website (Served from Render)**: `https://nehas-glamup.onrender.com/`
 - **Health Check**: `https://nehas-glamup.onrender.com/api/health`
 
 ---
@@ -89,13 +91,3 @@ In Render dashboard → Your service → **Environment**, add:
 > [!NOTE]
 > **Auto-Deploy**
 > Every push to the `main` branch on GitHub will trigger an automatic redeploy on Render.
-
----
-
-## Troubleshooting
-
-| Problem              | Solution                                                                 |
-| -------------------- | ------------------------------------------------------------------------ |
-| **Build fails**      | Check that `package.json` has all dependencies listed                    |
-| **Server crashes**   | Check Render logs for errors                                             |
-| **Images not loading** | Ensure image paths use relative URLs (e.g., `assets/uploads/...`)      |

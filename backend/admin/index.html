@@ -81,7 +81,10 @@
                     <h1 id="page-title">Dashboard Overview</h1>
                     <p id="page-subtitle" class="text-muted">Quick insights and operational controls.</p>
                 </div>
-                <div class="header-actions">
+                <div class="header-actions" style="display: flex; gap: 10px;">
+                    <button class="btn btn-secondary" id="btn-manage-categories" onclick="openCategoriesModal()" style="display: none;">
+                        <i data-lucide="settings"></i> Categories
+                    </button>
                     <button class="btn btn-gold" onclick="openAddModal()">
                         <i data-lucide="plus-circle"></i> Add New Product
                     </button>
@@ -256,6 +259,7 @@
                                 <option value="Occasions">Makeup (Occasions)</option>
                                 <option value="Specialized Techniques">Makeup (Specialized Techniques)</option>
                                 <option value="Styling Services">Makeup (Styling Services)</option>
+                                <option value="Mehendi Designs">Mehendi Designs (Artistry & Henna)</option>
                             </select>
                         </div>
                     </div>
@@ -290,6 +294,30 @@
             <span class="lightbox-zoom-level" id="zoom-level">100%</span>
             <button class="lightbox-zoom-btn" onclick="zoomLightbox(1)" title="Zoom In">&#43;</button>
             <button class="lightbox-zoom-btn" onclick="resetLightboxZoom()" title="Reset Zoom">&#8634;</button>
+        </div>
+    </div>
+
+    <!-- Manage Categories Modal -->
+    <div id="categories-modal" class="modal-overlay hidden">
+        <div class="modal-card" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>Manage Jewelry Categories</h2>
+                <button class="modal-close-btn" onclick="closeCategoriesModal()"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body" style="padding: 20px;">
+                <div class="form-group" style="display: flex; gap: 10px; margin-bottom: 20px; align-items: stretch;">
+                    <input type="text" id="new-category-input" placeholder="New category name (e.g. rings)" style="flex: 1; padding: 10px 16px; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--border-radius-sm); color: var(--text-primary);">
+                    <button class="btn btn-gold" onclick="addJewelryCategory()" style="padding: 10px 16px; height: auto;">Add <i data-lucide="plus" style="width: 14px; height: 14px; vertical-align: middle;"></i></button>
+                </div>
+                <div style="max-height: 300px; overflow-y: auto; padding-right: 5px;">
+                    <div id="categories-list-items" class="categories-edit-list">
+                        <!-- Categories dynamically loaded here -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="padding-top: 15px; border-top: 1px solid var(--border-color);">
+                <button class="btn btn-secondary" onclick="closeCategoriesModal()">Close</button>
+            </div>
         </div>
     </div>
 

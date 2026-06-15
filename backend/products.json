@@ -97,12 +97,60 @@
             "type": "makeup"
         },
         {
-            "id": "mehendi-services",
-            "title": "Mehendi Services",
-            "category": "Styling Services",
-            "description": "Beautiful, dark-staining henna designs from traditional bridal patterns to modern Arabic designs for brides and guests.",
+            "id": "mehendi-bridal",
+            "title": "Bridal Mehendi",
+            "category": "Mehendi Designs",
+            "description": "Full hands and feet traditional intricate bridal henna designs featuring elegant custom motifs, portraits, and dark-staining finish.",
             "icon": "🌿",
-            "type": "makeup"
+            "type": "mehendi"
+        },
+        {
+            "id": "mehendi-arabic",
+            "title": "Arabic Mehendi",
+            "category": "Mehendi Designs",
+            "description": "Bold, shaded floral patterns and flowing vines with thick outlines. Elegant and perfect for festivals or bridesmaids.",
+            "icon": "🌸",
+            "type": "mehendi"
+        },
+        {
+            "id": "mehendi-khafife",
+            "title": "Khafife Mehendi",
+            "category": "Mehendi Designs",
+            "description": "Ultra-thin, delicate, and symmetric geometric Arabic patterns that look like exquisite lace on the skin.",
+            "icon": "✨",
+            "type": "mehendi"
+        },
+        {
+            "id": "mehendi-indo-western",
+            "title": "Indo-Western Fusion",
+            "category": "Mehendi Designs",
+            "description": "A gorgeous blend of traditional Indian paisley motifs and spacious modern negative space Arabic layouts.",
+            "icon": "💫",
+            "type": "mehendi"
+        },
+        {
+            "id": "mehendi-mandala",
+            "title": "Mandala Mehendi",
+            "category": "Mehendi Designs",
+            "description": "Beautiful traditional circular mandala motifs placed at the center of palms and back of hands with decorative finger patterns.",
+            "icon": "🌀",
+            "type": "mehendi"
+        },
+        {
+            "id": "mehendi-baby-shower",
+            "title": "Baby Shower Special",
+            "category": "Mehendi Designs",
+            "description": "Customized henna patterns depicting motherhood, cradles, and baby motifs on palms celebrating upcoming motherhood.",
+            "icon": "👶",
+            "type": "mehendi"
+        },
+        {
+            "id": "mehendi-guest",
+            "title": "Guest & Family Henna",
+            "category": "Mehendi Designs",
+            "description": "Quick, elegant, and stylish single-strip or palm henna designs suited for wedding guests, bridesmaids, and kids.",
+            "icon": "💅",
+            "type": "mehendi"
         },
         {
             "id": "hydrafacial-glow",
@@ -824,5 +872,16 @@
             "isKorean": true,
             "originalPrice": "500"
         }
+    ],
+    "jewelryCategories": [
+        "bracelet",
+        "choker",
+        "anklet",
+        "nose pins",
+        "korean earrings",
+        "hair accessories",
+        "buggadi",
+        "chains for kids",
+        "rented jewelry"
     ]
 }

@@ -1563,3 +1563,36 @@ body {
         height: 180px;
     }
 }
+
+/* Category Manager Styles */
+.categories-edit-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 15px;
+}
+.categories-edit-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+.categories-edit-item button {
+    background: none;
+    border: none;
+    color: var(--accent-red);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 4px;
+    border-radius: var(--border-radius-sm);
+    transition: all 0.2s ease;
+}
+.categories-edit-item button:hover {
+    background: rgba(239, 68, 68, 0.1);
+}
