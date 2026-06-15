@@ -88,7 +88,7 @@ function resolveImageUrl(imagePath) {
 // Fetch categories from backend
 async function fetchCategories() {
     try {
-        const res = await fetch(`${CONFIG.API_BASE_URL}/api/jewelry-categories`);
+        const res = await fetch(`${CONFIG.API_BASE_URL}/api/jewelry-categories?t=${Date.now()}`);
         if (res.ok) {
             const data = await res.json();
             if (Array.isArray(data) && data.length > 0) {
@@ -122,7 +122,7 @@ function renderFilterTabs() {
 // Fetch live products to prevent browser caching locally
 async function fetchLiveJewelry() {
     try {
-        const res = await fetch(`${CONFIG.API_BASE_URL}/api/products`);
+        const res = await fetch(`${CONFIG.API_BASE_URL}/api/products?t=${Date.now()}`);
         if (res.ok) {
             const data = await res.json();
             if (data.jewelry && data.jewelry.length > 0) {

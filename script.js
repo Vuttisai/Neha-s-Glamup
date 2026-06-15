@@ -209,7 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const fetchLiveProducts = async () => {
         try {
             // Fetch live data directly from api (forces bypassing of cache if server is running)
-            const res = await fetch(`${CONFIG.API_BASE_URL}/api/products`);
+            const res = await fetch(`${CONFIG.API_BASE_URL}/api/products?t=${Date.now()}`);
             if (res.ok) {
                 const data = await res.json();
                 if (data.services && data.services.length > 0) {
