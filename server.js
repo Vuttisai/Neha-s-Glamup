@@ -1,12 +1,27 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
+const crypto = require('crypto');
+const { OAuth2Client } = require('google-auth-library');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const ADMIN_PASSCODE = process.env.ADMIN_PASSCODE || 'glamup2026';
+
+// Google OAuth Configuration
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
+const ADMIN_EMAILS = (process.env.ADMIN_EMAIL || '')
+    .toLowerCase()
+    .split(',')
+    .map(e => e.trim())
+    .filter(e => e.length > 0);
+const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
+
+// Session store (in-memory — resets on server restart)
+const sessions = new Map();
+const SESSION_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 // Paths
 const PRODUCTS_JSON_PATH = path.join(__dirname, 'products.json');
@@ -49,18 +64,156 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Serve products.js with caching disabled so edits reflect immediately
+app.get('/products.js', (req, res) => {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Content-Type', 'application/javascript');
+    res.sendFile(path.join(__dirname, 'products.js'));
+});
+
 // Serve frontend static files
 app.use(express.static(__dirname));
 
+// =============================================
+// SESSION & GOOGLE AUTH
+// =============================================
+
+// Create a new session
+function createSession(email, name, picture) {
+    // Clean up expired sessions
+    const now = Date.now();
+    for (const [token, session] of sessions) {
+        if (now > session.expiresAt) {
+            sessions.delete(token);
+        }
+    }
+
+    const token = crypto.randomBytes(32).toString('hex');
+    sessions.set(token, {
+        email,
+        name,
+        picture,
+        createdAt: now,
+        expiresAt: now + SESSION_EXPIRY_MS
+    });
+    return token;
+}
+
+// Validate a session token
+function getSession(token) {
+    if (!token) return null;
+    const session = sessions.get(token);
+    if (!session) return null;
+    if (Date.now() > session.expiresAt) {
+        sessions.delete(token);
+        return null;
+    }
+    return session;
+}
+
 // Security middleware for Admin API endpoints
 const adminAuth = (req, res, next) => {
-    const passcode = req.headers['x-admin-passcode'];
-    if (passcode === ADMIN_PASSCODE) {
+    const sessionToken = req.headers['x-admin-session'];
+    const session = getSession(sessionToken);
+    if (session) {
+        req.adminUser = session;
         next();
     } else {
-        res.status(401).json({ error: 'Unauthorized: Invalid admin passcode' });
+        res.status(401).json({ error: 'Unauthorized: Please sign in with Google' });
     }
 };
+
+// =============================================
+// AUTH ENDPOINTS
+// =============================================
+
+// Google Sign-In verification
+app.post('/api/auth/google', async (req, res) => {
+    const { credential } = req.body;
+
+    if (!credential) {
+        return res.status(400).json({ error: 'No credential provided' });
+    }
+
+    if (!GOOGLE_CLIENT_ID) {
+        return res.status(500).json({ error: 'Google Client ID not configured on server. Set GOOGLE_CLIENT_ID env variable.' });
+    }
+
+    if (ADMIN_EMAILS.length === 0) {
+        return res.status(500).json({ error: 'Admin email not configured on server. Set ADMIN_EMAIL env variable.' });
+    }
+
+    try {
+        // Verify the Google ID token
+        const ticket = await googleClient.verifyIdToken({
+            idToken: credential,
+            audience: GOOGLE_CLIENT_ID
+        });
+
+        const payload = ticket.getPayload();
+        const email = payload.email.toLowerCase().trim();
+        const name = payload.name || email;
+        const picture = payload.picture || '';
+
+        // Check if this email is in the authorized admin list
+        if (!ADMIN_EMAILS.includes(email)) {
+            console.log(`Access denied for: ${email} (authorized list: ${ADMIN_EMAILS.join(', ')})`);
+            return res.status(403).json({
+                error: 'Access denied',
+                message: `This Google account (${email}) is not authorized to access the admin panel.`
+            });
+        }
+
+        // Create session
+        const sessionToken = createSession(email, name, picture);
+        console.log(`Admin authenticated: ${name} (${email})`);
+
+        res.json({
+            success: true,
+            session: sessionToken,
+            user: { name, email, picture }
+        });
+
+    } catch (err) {
+        console.error('Google auth error:', err.message);
+        res.status(401).json({ error: 'Invalid Google credential. Please try signing in again.' });
+    }
+});
+
+// Validate existing session
+app.post('/api/auth/validate', (req, res) => {
+    const sessionToken = req.headers['x-admin-session'] || req.body.session;
+    const session = getSession(sessionToken);
+    if (session) {
+        res.json({
+            success: true,
+            user: { name: session.name, email: session.email, picture: session.picture }
+        });
+    } else {
+        res.status(401).json({ success: false, error: 'Session expired or invalid' });
+    }
+});
+
+// Logout — destroy session
+app.post('/api/auth/logout', (req, res) => {
+    const sessionToken = req.headers['x-admin-session'];
+    if (sessionToken) {
+        sessions.delete(sessionToken);
+    }
+    res.json({ success: true, message: 'Logged out successfully' });
+});
+
+// Get Google Client ID (public — needed by frontend for the sign-in button)
+app.get('/api/auth/config', (req, res) => {
+    res.json({
+        googleClientId: GOOGLE_CLIENT_ID,
+        configured: !!(GOOGLE_CLIENT_ID && ADMIN_EMAILS.length > 0)
+    });
+});
+
+// =============================================
+// DATA HELPERS
+// =============================================
 
 // Helper function to read products data
 const readProductsData = () => {
@@ -120,25 +273,17 @@ const deleteProductImage = (imagePath) => {
     }
 };
 
-// --- API Endpoints ---
+// =============================================
+// API ENDPOINTS
+// =============================================
 
-// 1. Validate passcode
-app.post('/api/auth/validate', (req, res) => {
-    const { passcode } = req.body;
-    if (passcode === ADMIN_PASSCODE) {
-        res.json({ success: true, message: 'Authenticated successfully' });
-    } else {
-        res.status(401).json({ success: false, error: 'Invalid passcode' });
-    }
-});
-
-// 2. Read all products (Public endpoint)
+// Read all products (Public endpoint)
 app.get('/api/products', (req, res) => {
     const data = readProductsData();
     res.json(data);
 });
 
-// 3. Create a product (Admin only)
+// Create a product (Admin only)
 app.post('/api/products', adminAuth, upload.single('image'), (req, res) => {
     try {
         const { type, name, title, category, price, originalPrice, description, icon, isKorean } = req.body;
@@ -207,7 +352,7 @@ app.post('/api/products', adminAuth, upload.single('image'), (req, res) => {
     }
 });
 
-// 4. Update a product (Admin only)
+// Update a product (Admin only)
 app.put('/api/products/:id', adminAuth, upload.single('image'), (req, res) => {
     try {
         const { id } = req.params;
@@ -282,7 +427,7 @@ app.put('/api/products/:id', adminAuth, upload.single('image'), (req, res) => {
     }
 });
 
-// 5. Delete a product (Admin only)
+// Delete a product (Admin only)
 app.delete('/api/products/:id', adminAuth, (req, res) => {
     try {
         const { id } = req.params;
@@ -334,4 +479,13 @@ app.listen(PORT, () => {
     console.log(`Server URL: http://localhost:${PORT}`);
     console.log(`Admin panel: http://localhost:${PORT}/admin.html`);
     console.log(`========================================`);
+    if (!GOOGLE_CLIENT_ID) {
+        console.log(`⚠️  GOOGLE_CLIENT_ID not set — Google Sign-In will not work`);
+    }
+    if (ADMIN_EMAILS.length === 0) {
+        console.log(`⚠️  ADMIN_EMAIL not set — No admin can sign in`);
+    }
+    if (ADMIN_EMAILS.length > 0) {
+        console.log(`✅ Authorized admin list: ${ADMIN_EMAILS.join(', ')}`);
+    }
 });

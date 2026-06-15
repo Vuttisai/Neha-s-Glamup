@@ -1,10 +1,11 @@
-// Neha's GlamUp - Admin Dashboard Logic
+// Neha's GlamUp - Admin Dashboard Logic (Google Sign-In Auth)
 let allProducts = { services: [], jewelry: [] };
 let currentSection = 'dashboard';
 let currentCategoryFilter = 'all';
 let searchQuery = '';
 let selectedImageFile = null;
 let searchDebounceTimer = null;
+let adminSession = null; // { token, user: { name, email, picture } }
 
 // Lightbox state
 let lightboxZoom = 1;
@@ -14,10 +15,12 @@ let lightboxDragging = false;
 let lightboxDragStartX = 0;
 let lightboxDragStartY = 0;
 
-// Initial Setup
+// =============================================
+// INITIALIZATION
+// =============================================
 document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
-    checkAuth();
+    initializeAuth();
     
     // Drag & Drop image files
     const dropZone = document.getElementById('image-drop-zone');
@@ -133,38 +136,168 @@ function getPinchDistance(touches) {
     return Math.sqrt(dx * dx + dy * dy);
 }
 
-// Get auth passcode from localStorage
-function getPasscode() {
-    return localStorage.getItem('glamup_admin_passcode') || '';
+// =============================================
+// GOOGLE SIGN-IN AUTHENTICATION
+// =============================================
+
+function getSessionToken() {
+    return localStorage.getItem('glamup_admin_session') || '';
 }
 
-// Check authorization status
-async function checkAuth() {
-    const passcode = getPasscode();
-    if (!passcode) {
-        showAuthScreen();
-        return;
+function setSessionData(token, user) {
+    localStorage.setItem('glamup_admin_session', token);
+    localStorage.setItem('glamup_admin_user', JSON.stringify(user));
+    adminSession = { token, user };
+}
+
+function clearSessionData() {
+    localStorage.removeItem('glamup_admin_session');
+    localStorage.removeItem('glamup_admin_user');
+    adminSession = null;
+}
+
+// Initialize auth — check existing session or show Google Sign-In
+async function initializeAuth() {
+    const savedToken = getSessionToken();
+    const savedUser = localStorage.getItem('glamup_admin_user');
+
+    // If we have a saved session, try to validate it
+    if (savedToken && savedUser) {
+        try {
+            const res = await fetch('/api/auth/validate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-admin-session': savedToken
+                }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                adminSession = { token: savedToken, user: data.user };
+                onAuthSuccess();
+                return;
+            }
+        } catch (err) {
+            console.error('Session validation failed:', err);
+        }
+        clearSessionData();
     }
-    
+
+    // No valid session — initialize Google Sign-In button
+    showAuthScreen();
+    initGoogleSignIn();
+}
+
+// Initialize Google Sign-In button
+async function initGoogleSignIn() {
     try {
-        const res = await fetch('/api/auth/validate', {
+        // Get client ID from server
+        const res = await fetch('/api/auth/config');
+        const config = await res.json();
+
+        if (!config.configured || !config.googleClientId) {
+            document.getElementById('auth-config-error').classList.remove('hidden');
+            return;
+        }
+
+        // Wait for Google Identity Services to load
+        if (typeof google === 'undefined' || !google.accounts) {
+            // GIS script hasn't loaded yet, wait for it
+            await new Promise((resolve) => {
+                const check = setInterval(() => {
+                    if (typeof google !== 'undefined' && google.accounts) {
+                        clearInterval(check);
+                        resolve();
+                    }
+                }, 200);
+                // Timeout after 10 seconds
+                setTimeout(() => { clearInterval(check); resolve(); }, 10000);
+            });
+        }
+
+        if (typeof google === 'undefined' || !google.accounts) {
+            document.getElementById('auth-config-error').textContent = 'Failed to load Google Sign-In. Please refresh the page.';
+            document.getElementById('auth-config-error').classList.remove('hidden');
+            return;
+        }
+
+        google.accounts.id.initialize({
+            client_id: config.googleClientId,
+            callback: handleGoogleCredential,
+            auto_select: false,
+            cancel_on_tap_outside: true
+        });
+
+        google.accounts.id.renderButton(
+            document.getElementById('google-signin-btn'),
+            {
+                theme: 'filled_black',
+                size: 'large',
+                width: 300,
+                text: 'signin_with',
+                shape: 'pill',
+                logo_alignment: 'left'
+            }
+        );
+
+    } catch (err) {
+        console.error('Failed to initialize Google Sign-In:', err);
+        document.getElementById('auth-config-error').textContent = 'Error setting up Google Sign-In. Check server configuration.';
+        document.getElementById('auth-config-error').classList.remove('hidden');
+    }
+}
+
+// Handle the Google credential response
+async function handleGoogleCredential(response) {
+    const errorEl = document.getElementById('auth-error');
+    errorEl.classList.add('hidden');
+
+    try {
+        const res = await fetch('/api/auth/google', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ passcode })
+            body: JSON.stringify({ credential: response.credential })
         });
-        
-        if (res.ok) {
-            hideAuthScreen();
-            loadProducts();
+
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+            setSessionData(data.session, data.user);
+            onAuthSuccess();
+            showToast(`Welcome, ${data.user.name}!`, 'success');
         } else {
-            localStorage.removeItem('glamup_admin_passcode');
-            showAuthScreen();
+            errorEl.textContent = data.message || data.error || 'Access denied.';
+            errorEl.classList.remove('hidden');
         }
     } catch (err) {
-        console.error('Auth verification failed:', err);
-        showToast('Network error during authentication validation.', 'error');
-        showAuthScreen();
+        console.error('Google auth error:', err);
+        errorEl.textContent = 'Network error. Please try again.';
+        errorEl.classList.remove('hidden');
     }
+}
+
+// Called after successful authentication
+function onAuthSuccess() {
+    hideAuthScreen();
+    updateAdminProfile();
+    loadProducts();
+}
+
+// Update sidebar with admin's profile
+function updateAdminProfile() {
+    if (!adminSession || !adminSession.user) return;
+    const { name, email, picture } = adminSession.user;
+
+    const avatarEl = document.getElementById('admin-avatar');
+    const nameEl = document.getElementById('admin-name');
+    const emailEl = document.getElementById('admin-email');
+
+    if (avatarEl && picture) {
+        avatarEl.src = picture;
+        avatarEl.style.display = 'block';
+    }
+    if (nameEl) nameEl.textContent = name || 'Admin';
+    if (emailEl) emailEl.textContent = email || 'Admin Console';
 }
 
 function showAuthScreen() {
@@ -179,38 +312,21 @@ function hideAuthScreen() {
     document.getElementById('hamburger-btn').classList.remove('hidden');
 }
 
-// Handle Admin authentication form submission
-async function handleLogin(e) {
-    e.preventDefault();
-    const passcode = document.getElementById('passcode').value;
-    const errorText = document.getElementById('auth-error');
-    errorText.classList.add('hidden');
-    
-    try {
-        const res = await fetch('/api/auth/validate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ passcode })
-        });
-        
-        if (res.ok) {
-            localStorage.setItem('glamup_admin_passcode', passcode);
-            hideAuthScreen();
-            loadProducts();
-            showToast('Authenticated successfully.', 'success');
-        } else {
-            errorText.classList.remove('hidden');
-        }
-    } catch (err) {
-        showToast('Authentication failed.', 'error');
-    }
-}
-
 // Handle Logout
-function handleLogout() {
-    localStorage.removeItem('glamup_admin_passcode');
+async function handleLogout() {
+    try {
+        await fetch('/api/auth/logout', {
+            method: 'POST',
+            headers: { 'x-admin-session': getSessionToken() }
+        });
+    } catch (err) {
+        // Ignore network errors on logout
+    }
+    clearSessionData();
     showAuthScreen();
     closeSidebar();
+    // Re-render Google Sign-In button
+    initGoogleSignIn();
     showToast('Logged out successfully.', 'info');
 }
 
@@ -284,7 +400,6 @@ function applyLightboxTransform() {
 // DATA MANAGEMENT
 // =============================================
 
-// Fetch all catalog products from the database
 async function loadProducts() {
     try {
         const res = await fetch('/api/products');
@@ -298,11 +413,10 @@ async function loadProducts() {
             showToast('Failed to load products.', 'error');
         }
     } catch (err) {
-        showToast('Error connecting to local server APIs.', 'error');
+        showToast('Error connecting to server.', 'error');
     }
 }
 
-// Update Dashboard numbers
 function updateDashboardMetrics() {
     const jewelry = allProducts.jewelry || [];
     const services = allProducts.services || [];
@@ -317,13 +431,9 @@ function updateDashboardMetrics() {
 function switchSection(section, event) {
     if (event) {
         event.preventDefault();
-        
-        // Remove active class from all nav items
         document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-        // Add to clicked item
         event.currentTarget.classList.add('active');
     } else {
-        // Find match in sidebar list
         document.querySelectorAll('.nav-item').forEach(item => {
             const label = item.textContent.trim().toLowerCase();
             if (label.includes(section)) {
@@ -355,7 +465,6 @@ function switchSection(section, event) {
         pageSubtitle.textContent = 'Manage inventory of items available for rent and sale.';
         dbSection.classList.add('hidden');
         catalogSection.classList.remove('hidden');
-        
         setupFilters(['All Jewelry', 'For Sale (Selling)', 'For Rent (Renting)', 'Korean Showcase']);
         renderTable();
     } else if (section === 'services') {
@@ -363,16 +472,13 @@ function switchSection(section, event) {
         pageSubtitle.textContent = 'Add, modify, or remove skincare, facials, and makeup artistry services.';
         dbSection.classList.add('hidden');
         catalogSection.classList.remove('hidden');
-        
         setupFilters(['All Services', 'Makeup Artistry', 'Beautician Services']);
         renderTable();
     }
 
-    // Close sidebar on mobile after navigation
     closeSidebar();
 }
 
-// Render dynamic toolbar categories filters
 function setupFilters(tabs) {
     const container = document.getElementById('category-filters');
     container.innerHTML = '';
@@ -381,7 +487,6 @@ function setupFilters(tabs) {
         const btn = document.createElement('button');
         btn.className = `filter-tab ${index === 0 ? 'active' : ''}`;
         
-        // Map friendly names to internal filter keys
         let filterKey = 'all';
         if (tab.includes('Sale') || tab.includes('Selling')) filterKey = 'selling';
         else if (tab.includes('Rent') || tab.includes('Renting')) filterKey = 'renting';
@@ -401,7 +506,7 @@ function setupFilters(tabs) {
     });
 }
 
-// Debounced search input
+// Debounced search
 function handleSearch() {
     clearTimeout(searchDebounceTimer);
     searchDebounceTimer = setTimeout(() => {
@@ -425,7 +530,6 @@ function renderTable() {
     let items = [];
     
     if (currentSection === 'jewelry') {
-        // Set Table Headers
         tableHeaders.innerHTML = `
             <th style="width: 100px;">Photo</th>
             <th>Name</th>
@@ -438,7 +542,6 @@ function renderTable() {
         
         items = allProducts.jewelry || [];
         
-        // Category Filter
         if (currentCategoryFilter !== 'all') {
             if (currentCategoryFilter === 'korean') {
                 items = items.filter(item => item.isKorean === true);
@@ -447,7 +550,6 @@ function renderTable() {
             }
         }
         
-        // Search Filter
         if (searchQuery) {
             items = items.filter(item => 
                 item.name.toLowerCase().includes(searchQuery) ||
@@ -456,7 +558,6 @@ function renderTable() {
             );
         }
         
-        // Populate lists
         if (items.length === 0) {
             emptyState.classList.remove('hidden');
             document.querySelector('.table-container').classList.add('hidden');
@@ -466,18 +567,16 @@ function renderTable() {
             document.querySelector('.table-container').classList.remove('hidden');
             
             items.forEach(item => {
-                // Desktop table row
                 const tr = document.createElement('tr');
                 const isKoreanLabel = item.isKorean 
                     ? `<span class="badge badge-gold"><i data-lucide="check" style="width:12px;height:12px;"></i> Yes</span>` 
                     : `<span class="text-muted">No</span>`;
                 
-                let priceDisplay = '';
                 const originalText = item.originalPrice ? `<span class="original-price">\u20b9${item.originalPrice}</span> ` : '';
                 const mainPriceText = item.price ? (item.price.toString().startsWith('Rent:') || item.price.toString().includes('\u20b9') ? item.price : `\u20b9${item.price}`) : 'Not Set';
-                priceDisplay = `<span class="item-price">${originalText}${mainPriceText}</span>`;
-
+                const priceDisplay = `<span class="item-price">${originalText}${mainPriceText}</span>`;
                 const escapedImage = (item.image || '').replace(/'/g, "\\'");
+
                 tr.innerHTML = `
                     <td><img src="${item.image}" class="table-img" alt="${item.name}" onclick="openLightbox('${escapedImage}')"></td>
                     <td><strong>${item.name}</strong><br><span class="text-muted" style="font-size:0.75rem;">${item.id}</span></td>
@@ -494,7 +593,6 @@ function renderTable() {
                 `;
                 listBody.appendChild(tr);
 
-                // Mobile card
                 const card = document.createElement('div');
                 card.className = 'mobile-card';
                 card.innerHTML = `
@@ -518,7 +616,6 @@ function renderTable() {
         }
         
     } else if (currentSection === 'services') {
-        // Set Table Headers
         tableHeaders.innerHTML = `
             <th style="width: 100px;">Icon</th>
             <th>Service Title</th>
@@ -530,12 +627,10 @@ function renderTable() {
         
         items = allProducts.services || [];
         
-        // Category Filter
         if (currentCategoryFilter !== 'all') {
             items = items.filter(item => item.type === currentCategoryFilter);
         }
         
-        // Search Filter
         if (searchQuery) {
             items = items.filter(item => 
                 item.title.toLowerCase().includes(searchQuery) ||
@@ -545,7 +640,6 @@ function renderTable() {
             );
         }
         
-        // Populate lists
         if (items.length === 0) {
             emptyState.classList.remove('hidden');
             document.querySelector('.table-container').classList.add('hidden');
@@ -555,7 +649,6 @@ function renderTable() {
             document.querySelector('.table-container').classList.remove('hidden');
             
             items.forEach(item => {
-                // Desktop table row
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td><div class="table-icon">${item.icon || '🌸'}</div></td>
@@ -572,7 +665,6 @@ function renderTable() {
                 `;
                 listBody.appendChild(tr);
 
-                // Mobile card
                 const card = document.createElement('div');
                 card.className = 'mobile-card';
                 card.innerHTML = `
@@ -606,7 +698,6 @@ function openAddModal() {
     document.getElementById('modal-title').textContent = 'Add New Product';
     document.getElementById('btn-save-submit').innerHTML = 'Add Product <i data-lucide="plus"></i>';
     
-    // Default form configuration based on active section
     const formType = document.getElementById('form-type');
     if (currentSection === 'services') {
         formType.value = 'service';
@@ -627,7 +718,7 @@ function openEditModal(type, id) {
     
     const formType = document.getElementById('form-type');
     formType.value = type;
-    formType.disabled = true; // Disable type switching when editing
+    formType.disabled = true;
     
     if (type === 'jewelry') {
         const item = allProducts.jewelry.find(item => item.id === id);
@@ -639,12 +730,10 @@ function openEditModal(type, id) {
             document.getElementById('form-jewelry-korean').checked = item.isKorean;
             document.getElementById('form-description').value = item.description;
             
-            // Show current image preview
             if (item.image) {
                 const previewImg = document.getElementById('image-preview');
                 const previewContainer = document.getElementById('image-preview-container');
                 const label = document.getElementById('upload-label');
-                
                 previewImg.src = item.image;
                 previewContainer.classList.remove('hidden');
                 label.textContent = "Uploaded jewelry image is set";
@@ -675,7 +764,6 @@ function resetForm() {
     document.getElementById('product-form').reset();
     document.getElementById('form-item-id').value = '';
     
-    // Reset image preview state
     const previewContainer = document.getElementById('image-preview-container');
     if (previewContainer) previewContainer.classList.add('hidden');
     const previewImg = document.getElementById('image-preview');
@@ -687,7 +775,6 @@ function resetForm() {
     selectedImageFile = null;
 }
 
-// Toggle between fields depending on selected product type (Jewelry vs Service)
 function toggleFormFields() {
     const type = document.getElementById('form-type').value;
     const jewelryFields = document.getElementById('jewelry-fields-group');
@@ -696,7 +783,6 @@ function toggleFormFields() {
     if (type === 'jewelry') {
         jewelryFields.classList.remove('hidden');
         serviceFields.classList.add('hidden');
-        // Require image file only if it is a new item creation
         const itemId = document.getElementById('form-item-id').value;
         document.getElementById('form-jewelry-image').required = !itemId;
     } else {
@@ -706,23 +792,19 @@ function toggleFormFields() {
     }
 }
 
-// Trigger browser file dialog
 function triggerImageInput() {
     document.getElementById('form-jewelry-image').click();
 }
 
-// Show preview of selected upload image
 function previewSelectedImage(event) {
     const input = event.target;
     if (input.files && input.files[0]) {
         selectedImageFile = input.files[0];
-        
         const reader = new FileReader();
         reader.onload = function(e) {
             const previewImg = document.getElementById('image-preview');
             const previewContainer = document.getElementById('image-preview-container');
             const label = document.getElementById('upload-label');
-            
             previewImg.src = e.target.result;
             previewContainer.classList.remove('hidden');
             label.textContent = selectedImageFile.name;
@@ -731,25 +813,14 @@ function previewSelectedImage(event) {
     }
 }
 
-// Clear selected image
 function removeImagePreview(event) {
     if (event) event.stopPropagation();
-    
     const input = document.getElementById('form-jewelry-image');
-    input.value = ''; // Reset files
-    
-    const previewContainer = document.getElementById('image-preview-container');
-    previewContainer.classList.add('hidden');
-    
-    const previewImg = document.getElementById('image-preview');
-    previewImg.src = '';
-    
-    const label = document.getElementById('upload-label');
-    label.textContent = 'Drag & drop jewelry photo or click to browse';
-    
+    input.value = '';
+    document.getElementById('image-preview-container').classList.add('hidden');
+    document.getElementById('image-preview').src = '';
+    document.getElementById('upload-label').textContent = 'Drag & drop jewelry photo or click to browse';
     selectedImageFile = null;
-    
-    // If editing, require image only if there isn't an existing one
     const itemId = document.getElementById('form-item-id').value;
     input.required = !itemId;
 }
@@ -820,7 +891,7 @@ async function handleFormSubmit(e) {
         const res = await fetch(url, {
             method: method,
             headers: {
-                'x-admin-passcode': getPasscode()
+                'x-admin-session': getSessionToken()
             },
             body: formData
         });
@@ -828,7 +899,7 @@ async function handleFormSubmit(e) {
         if (res.ok) {
             const result = await res.json();
             
-            // Optimistic update — apply the returned item directly to local state
+            // Optimistic update
             if (type === 'jewelry') {
                 if (isEdit) {
                     const idx = allProducts.jewelry.findIndex(j => j.id === id);
@@ -846,19 +917,23 @@ async function handleFormSubmit(e) {
             }
 
             updateDashboardMetrics();
-            showToast(isEdit ? 'Product updated successfully!' : 'New product added!', 'success');
+            showToast(isEdit ? 'Product updated!' : 'New product added!', 'success');
             closeModal();
             
-            // Re-render the current view with local data (instant, no network)
             if (currentSection !== 'dashboard') {
                 renderTable();
             }
+        } else if (res.status === 401) {
+            showToast('Session expired. Please sign in again.', 'error');
+            clearSessionData();
+            showAuthScreen();
+            initGoogleSignIn();
         } else {
             const err = await res.json();
-            showToast(err.error || 'Server returned an error.', 'error');
+            showToast(err.error || 'Server error.', 'error');
         }
     } catch (err) {
-        showToast('Network error during form submission.', 'error');
+        showToast('Network error.', 'error');
     } finally {
         saveButton.disabled = false;
         saveButton.innerHTML = originalText;
@@ -870,42 +945,37 @@ async function handleFormSubmit(e) {
 // DELETE (Optimistic)
 // =============================================
 async function deleteProduct(id) {
-    if (!confirm('Are you sure you want to permanently delete this product?')) {
-        return;
-    }
+    if (!confirm('Are you sure you want to permanently delete this product?')) return;
     
     try {
         const res = await fetch(`/api/products/${id}`, {
             method: 'DELETE',
-            headers: {
-                'x-admin-passcode': getPasscode()
-            }
+            headers: { 'x-admin-session': getSessionToken() }
         });
         
         if (res.ok) {
-            // Optimistic delete from local state
             const jIdx = allProducts.jewelry.findIndex(j => j.id === id);
             if (jIdx !== -1) {
                 allProducts.jewelry.splice(jIdx, 1);
             } else {
                 const sIdx = allProducts.services.findIndex(s => s.id === id);
-                if (sIdx !== -1) {
-                    allProducts.services.splice(sIdx, 1);
-                }
+                if (sIdx !== -1) allProducts.services.splice(sIdx, 1);
             }
 
             updateDashboardMetrics();
             showToast('Product deleted.', 'success');
-            
-            if (currentSection !== 'dashboard') {
-                renderTable();
-            }
+            if (currentSection !== 'dashboard') renderTable();
+        } else if (res.status === 401) {
+            showToast('Session expired. Please sign in again.', 'error');
+            clearSessionData();
+            showAuthScreen();
+            initGoogleSignIn();
         } else {
             const err = await res.json();
-            showToast(err.error || 'Failed to delete product.', 'error');
+            showToast(err.error || 'Failed to delete.', 'error');
         }
     } catch (err) {
-        showToast('Network error during delete operation.', 'error');
+        showToast('Network error.', 'error');
     }
 }
 
@@ -914,7 +984,6 @@ async function deleteProduct(id) {
 // =============================================
 function showToast(message, type = 'info') {
     const container = document.getElementById('toast-container');
-    
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
     
@@ -930,7 +999,6 @@ function showToast(message, type = 'info') {
     container.appendChild(toast);
     lucide.createIcons();
     
-    // Automatically dismiss toast
     setTimeout(() => {
         toast.style.transform = 'translateX(100px)';
         toast.style.opacity = '0';

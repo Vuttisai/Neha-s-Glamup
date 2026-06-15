@@ -10,6 +10,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Identity Services -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <!-- CSS -->
     <link rel="stylesheet" href="admin-styles.css">
 </head>
@@ -19,14 +21,16 @@
         <div class="auth-card">
             <h1 class="auth-title">Neha's GlamUp</h1>
             <p class="auth-subtitle">Administration Portal</p>
-            <form id="auth-form" onsubmit="handleLogin(event)">
-                <div class="form-group">
-                    <label for="passcode">Admin Passcode</label>
-                    <input type="password" id="passcode" required placeholder="Enter passcode" autocomplete="current-password">
-                </div>
-                <button type="submit" class="btn btn-primary btn-block">Verify Access <i data-lucide="shield-check"></i></button>
-                <p id="auth-error" class="error-text hidden">Invalid passcode. Please try again.</p>
-            </form>
+            <div class="google-signin-section">
+                <p class="signin-label">Sign in with your authorized Google account</p>
+                <div id="google-signin-btn" class="google-btn-container"></div>
+                <p id="auth-error" class="error-text hidden">Access denied. This account is not authorized.</p>
+                <p id="auth-config-error" class="error-text hidden">Google Sign-In not configured. Please set GOOGLE_CLIENT_ID and ADMIN_EMAIL environment variables.</p>
+            </div>
+            <div class="auth-footer-note">
+                <i data-lucide="shield-check" style="width:14px;height:14px;"></i>
+                <span>Only the authorized admin Gmail account can access this panel</span>
+            </div>
         </div>
     </div>
 
@@ -43,10 +47,10 @@
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-header">
-                <div class="logo-circle">N</div>
+                <img id="admin-avatar" class="admin-avatar" src="" alt="Admin">
                 <div class="sidebar-title-group">
-                    <h2 class="sidebar-brand">Neha's GlamUp</h2>
-                    <span class="sidebar-role">Admin Console</span>
+                    <h2 class="sidebar-brand" id="admin-name">Neha's GlamUp</h2>
+                    <span class="sidebar-role" id="admin-email">Admin Console</span>
                 </div>
             </div>
             <nav class="sidebar-nav">
