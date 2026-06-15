@@ -295,11 +295,9 @@ function renderTable() {
                     : `<span class="text-muted">No</span>`;
                 
                 let priceDisplay = '';
-                if (item.category === 'selling') {
-                    priceDisplay = `<span class="item-price"><span class="original-price">₹500</span> ₹250</span>`;
-                } else {
-                    priceDisplay = `<span class="item-price">${item.price || 'Not Set'}</span>`;
-                }
+                const originalText = item.originalPrice ? `<span class="original-price">₹${item.originalPrice}</span> ` : '';
+                const mainPriceText = item.price ? (item.price.toString().startsWith('Rent:') || item.price.toString().includes('₹') ? item.price : `₹${item.price}`) : 'Not Set';
+                priceDisplay = `<span class="item-price">${originalText}${mainPriceText}</span>`;
 
                 tr.innerHTML = `
                     <td><img src="${item.image}" class="table-img" alt="${item.name}"></td>
@@ -413,6 +411,7 @@ function openEditModal(type, id) {
             document.getElementById('form-jewelry-name').value = item.name;
             document.getElementById('form-jewelry-category').value = item.category;
             document.getElementById('form-jewelry-price').value = item.price;
+            document.getElementById('form-jewelry-original-price').value = item.originalPrice || '';
             document.getElementById('form-jewelry-korean').checked = item.isKorean;
             document.getElementById('form-description').value = item.description;
             
@@ -546,6 +545,7 @@ async function handleFormSubmit(e) {
         const name = document.getElementById('form-jewelry-name').value;
         const category = document.getElementById('form-jewelry-category').value;
         const price = document.getElementById('form-jewelry-price').value;
+        const originalPrice = document.getElementById('form-jewelry-original-price').value;
         const isKorean = document.getElementById('form-jewelry-korean').checked;
         const imageInput = document.getElementById('form-jewelry-image');
         const description = document.getElementById('form-description').value;
@@ -558,6 +558,7 @@ async function handleFormSubmit(e) {
         formData.append('name', name);
         formData.append('category', category);
         formData.append('price', price);
+        formData.append('originalPrice', originalPrice);
         formData.append('isKorean', isKorean);
         formData.append('description', description);
         

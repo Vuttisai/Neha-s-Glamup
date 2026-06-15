@@ -141,7 +141,7 @@ app.get('/api/products', (req, res) => {
 // 3. Create a product (Admin only)
 app.post('/api/products', adminAuth, upload.single('image'), (req, res) => {
     try {
-        const { type, name, title, category, price, description, icon, isKorean } = req.body;
+        const { type, name, title, category, price, originalPrice, description, icon, isKorean } = req.body;
         const data = readProductsData();
         
         if (type === 'jewelry') {
@@ -161,6 +161,7 @@ app.post('/api/products', adminAuth, upload.single('image'), (req, res) => {
                 name,
                 category, // 'renting' or 'selling'
                 price: price || '',
+                originalPrice: originalPrice || '',
                 description: description || '',
                 image: imagePath,
                 isKorean: isKorean === 'true'
@@ -210,7 +211,7 @@ app.post('/api/products', adminAuth, upload.single('image'), (req, res) => {
 app.put('/api/products/:id', adminAuth, upload.single('image'), (req, res) => {
     try {
         const { id } = req.params;
-        const { type, name, title, category, price, description, icon, isKorean } = req.body;
+        const { type, name, title, category, price, originalPrice, description, icon, isKorean } = req.body;
         const data = readProductsData();
         
         let found = false;
@@ -234,6 +235,7 @@ app.put('/api/products/:id', adminAuth, upload.single('image'), (req, res) => {
                     name: name || oldItem.name,
                     category: category || oldItem.category,
                     price: price !== undefined ? price : oldItem.price,
+                    originalPrice: originalPrice !== undefined ? originalPrice : oldItem.originalPrice,
                     description: description !== undefined ? description : oldItem.description,
                     image: imagePath,
                     isKorean: isKorean !== undefined ? (isKorean === 'true') : oldItem.isKorean

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Neha's GlamUp - Premium Jewelry Collection in Hyderabad. Rent gorgeous bridal sets, Kundan, and Temple jewelry, or shop our exclusive Korean designs.">
+    <meta name="keywords"
+        content="Jewelry Renting Hyderabad, Rent Bridal Accessories, Korean Jewelry Online, Kundan Necklace Rent, Neha GlamUp">
+    <meta name="author" content="Neha's GlamUp">
+    <meta property="og:title" content="Neha's GlamUp – Premium Jewelry Renting & Selling Catalog">
+    <meta property="og:description"
+        content="Rent or buy premium Kundan, Temple, and CZ bridal sets or shop unique imported Korean designs from ₹250.">
+    <meta property="og:image" content="assets/logo.jpg">
+    <meta property="og:url" content="https://nehasglamup.com/jewelry.html">
+    <title>Premium Jewelry Catalog | Neha's GlamUp | Hyderabad</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
+        rel="stylesheet">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Main Styles & Custom Jewelry Styles -->
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="jewelry-styles.css">
+</head>
+
+<body>
+
+    <!-- Header / Navbar -->
+    <header class="navbar-header scrolled" id="header">
+        <div class="nav-container">
+            <a href="index.html" class="logo-link" id="nav-logo-link">
+                <img src="assets/logo.jpg" alt="Neha's GlamUp Logo" class="nav-logo">
+                <span class="brand-name">Neha's <span class="gold-text">GlamUp</span></span>
+            </a>
+
+            <nav class="nav-menu" id="nav-menu">
+                <a href="index.html" class="nav-item" id="link-home">Home</a>
+                <a href="index.html#about" class="nav-item" id="link-about">About</a>
+                <a href="index.html#catalog" class="nav-item" id="link-catalog">Services</a>
+                <a href="jewelry.html" class="nav-item active" id="link-jewelry">Jewelry Catalog</a>
+                <a href="index.html#gallery" class="nav-item" id="link-gallery">Gallery</a>
+                <a href="index.html#contact" class="nav-item" id="link-contact">Contact</a>
+            </nav>
+
+            <div class="nav-right">
+                <a href="https://instagram.com/neha__glam_up" target="_blank" class="nav-social-link"
+                    id="btn-nav-insta" aria-label="Follow us on Instagram">
+                    <i data-lucide="instagram"></i>
+                </a>
+                <a href="https://wa.me/917337480803" target="_blank" class="btn btn-primary btn-nav-cta"
+                    id="btn-quick-book">
+                    <i data-lucide="phone"></i> Book Now
+                </a>
+                <button class="menu-toggle" id="menu-toggle" aria-label="Toggle Navigation Menu">
+                    <i data-lucide="menu" class="icon-menu"></i>
+                    <i data-lucide="x" class="icon-close"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Drawer Menu -->
+    <div class="mobile-drawer" id="mobile-drawer">
+        <nav class="mobile-nav">
+            <a href="index.html" class="mobile-nav-item" id="mob-link-home">Home</a>
+            <a href="index.html#about" class="mobile-nav-item" id="mob-link-about">About</a>
+            <a href="index.html#catalog" class="mobile-nav-item" id="mob-link-catalog">Services</a>
+            <a href="jewelry.html" class="mobile-nav-item active" id="mob-link-jewelry">Jewelry Catalog</a>
+            <a href="index.html#gallery" class="mobile-nav-item" id="mob-link-gallery">Gallery</a>
+            <a href="index.html#contact" class="mobile-nav-item" id="mob-link-contact">Contact</a>
+            <a href="https://wa.me/917337480803" target="_blank" class="btn btn-primary mob-cta-btn" id="mob-btn-book">
+                <i data-lucide="message-square"></i> Book Appointment
+            </a>
+        </nav>
+    </div>
+
+    <!-- Jewelry Hero Section -->
+    <section class="jewelry-hero">
+        <div class="hero-overlay"></div>
+        <div class="hero-content text-center">
+            <span class="sub-title gold-text">Exclusive Collections</span>
+            <h1 class="hero-title font-serif">Premium Jewelry Catalog</h1>
+            <div class="heading-divider"></div>
+            <p class="hero-desc text-muted">Rent royal bridal accessory sets or purchase unique, handpicked Korean designs to complete your elegant look.</p>
+        </div>
+    </section>
+
+    <!-- Jewelry Catalog Section -->
+    <section class="catalog-section" style="padding-top: 50px;">
+        <div class="container">
+            <!-- Search & Filters Toolbar -->
+            <div class="toolbar-wrapper">
+                <div class="search-box">
+                    <i data-lucide="search" class="search-icon"></i>
+                    <input type="text" id="search-input" placeholder="Search jewelry by name or design description..." oninput="handleSearch()">
+                </div>
+                
+                <div class="filter-controls">
+                    <!-- Category Tabs -->
+                    <div class="category-tabs">
+                        <button class="filter-tab active" data-filter="all" onclick="filterCategory('all')">All Collections</button>
+                        <button class="filter-tab" data-filter="selling" onclick="filterCategory('selling')">For Sale</button>
+                        <button class="filter-tab" data-filter="renting" onclick="filterCategory('renting')">For Rent</button>
+                        <button class="filter-tab" data-filter="korean" onclick="filterCategory('korean')">Korean Showcase</button>
+                    </div>
+
+                    <!-- Sorting Dropdown -->
+                    <div class="sort-wrapper">
+                        <label for="sort-select" class="sort-label text-muted"><i data-lucide="sliders-horizontal"></i> Sort:</label>
+                        <select id="sort-select" class="sort-dropdown" onchange="handleSort()">
+                            <option value="default">Default</option>
+                            <option value="name-asc">Name (A to Z)</option>
+                            <option value="name-desc">Name (Z to A)</option>
+                            <option value="price-asc">Price (Low to High)</option>
+                            <option value="price-desc">Price (High to Low)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Grid -->
+            <div class="jewelry-grid" id="jewelry-grid">
+                <!-- Dynamically populated via javascript -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="empty-state" class="empty-state hidden text-center">
+                <i data-lucide="inbox" class="empty-icon gold-text"></i>
+                <h3>No Jewelry Found</h3>
+                <p class="text-muted">Try clearing your filters or typing another search term.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lightbox Modal (Enquiry & Copying Features) -->
+    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+        <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+        <div class="lightbox-content" onclick="event.stopPropagation()">
+            <img src="" alt="" id="lightbox-img">
+            <h3 id="lightbox-title" style="margin-top: 15px; font-family: var(--font-serif); font-size: 1.4rem; color: var(--gold-primary);"></h3>
+            <p id="lightbox-caption" class="text-muted" style="margin-bottom: 20px; font-size: 0.95rem;"></p>
+            
+            <div class="lightbox-action-row">
+                <a href="" target="_blank" class="btn btn-primary" id="lightbox-wa-btn">
+                    Enquire on WhatsApp <i data-lucide="message-circle"></i>
+                </a>
+                <button class="btn btn-secondary" id="lightbox-copy-btn">
+                    Copy Photo <i data-lucide="copy"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Footer -->
+    <footer class="footer-bar">
+        <div class="container text-center">
+            <p>&copy; 2026 Neha's GlamUp. All Rights Reserved.</p>
+            <p class="footer-subtext">Certified Professional Makeup Artist & Premium Jewelry Rentals in Hyderabad.</p>
+        </div>
+    </footer>
+
+    <!-- Products Data File -->
+    <script src="products.js"></script>
+
+    <!-- Script Logic File -->
+    <script src="jewelry-script.js"></script>
+
+</body>
+
+</html>

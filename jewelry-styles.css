@@ -1,0 +1,327 @@
+/* ==========================================================================
+   Neha's GlamUp - Dedicated Jewelry Catalog Stylesheet
+   ========================================================================== */
+
+/* Subpage Hero */
+.jewelry-hero {
+    position: relative;
+    padding: 140px 0 100px;
+    background: linear-gradient(rgba(11, 11, 11, 0.8), rgba(11, 11, 11, 0.95)), url('assets/jewelry_kundan_set.jpg') no-repeat center center;
+    background-size: cover;
+    background-attachment: fixed;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, transparent 20%, var(--bg-primary) 90%);
+}
+
+.hero-content {
+    position: relative;
+    z-index: 5;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+.hero-title {
+    font-size: 3rem;
+    font-weight: 500;
+    margin: 10px 0 20px;
+    color: #ffffff;
+    letter-spacing: 1px;
+}
+
+.hero-desc {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Toolbar Controls */
+.toolbar-wrapper {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    padding: 24px;
+    margin-bottom: 50px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    box-shadow: var(--shadow-sm);
+}
+
+.toolbar-wrapper .search-box {
+    position: relative;
+    width: 100%;
+}
+
+.toolbar-wrapper .search-icon {
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    width: 20px;
+    height: 20px;
+}
+
+#search-input {
+    width: 100%;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    padding: 14px 16px 14px 54px;
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 0.95rem;
+    transition: var(--transition-fast);
+}
+
+#search-input:focus {
+    outline: none;
+    border-color: var(--gold-primary);
+    box-shadow: 0 0 12px rgba(212, 175, 55, 0.15);
+}
+
+.filter-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.category-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.filter-tab {
+    padding: 10px 20px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 30px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    transition: var(--transition-fast);
+    cursor: pointer;
+}
+
+.filter-tab:hover {
+    border-color: var(--border-hover);
+    color: var(--gold-primary);
+}
+
+.filter-tab.active {
+    background: var(--gold-gradient);
+    color: var(--bg-primary);
+    border-color: transparent;
+    font-weight: 600;
+    box-shadow: var(--shadow-sm);
+}
+
+.sort-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sort-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.sort-dropdown {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    color: #ffffff;
+    padding: 10px 16px;
+    border-radius: var(--border-radius-md);
+    font-family: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    outline: none;
+    transition: var(--transition-fast);
+}
+
+.sort-dropdown:focus {
+    border-color: var(--gold-primary);
+}
+
+/* Product Cards Grid */
+.jewelry-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    margin-bottom: 80px;
+}
+
+.p-bottom-price {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
+}
+
+.btn-copy-float {
+    background: rgba(212, 175, 55, 0.05);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: var(--transition-fast);
+}
+
+.btn-copy-float:hover {
+    background: rgba(212, 175, 55, 0.15);
+    border-color: var(--gold-primary);
+    color: var(--gold-primary);
+    transform: translateY(-1px);
+}
+
+.btn-copy-float i {
+    width: 12px;
+    height: 12px;
+}
+
+/* Lightbox Actions */
+.lightbox-title {
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    color: var(--gold-primary);
+    margin-top: 15px;
+    margin-bottom: 5px;
+}
+
+.lightbox-action-row {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 25px;
+    flex-wrap: wrap;
+}
+
+/* Empty State */
+.empty-state {
+    padding: 80px 40px;
+    background: var(--bg-secondary);
+    border: 1px dashed var(--border-color);
+    border-radius: var(--border-radius-lg);
+    margin-bottom: 80px;
+}
+
+.empty-icon {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 20px;
+    opacity: 0.8;
+}
+
+.empty-state h3 {
+    font-family: var(--font-serif);
+    font-size: 1.6rem;
+    margin-bottom: 10px;
+    color: #ffffff;
+}
+
+/* Toasts styling overrides */
+.toast-container {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 2000;
+}
+
+.toast {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 24px;
+    border-radius: var(--border-radius-md);
+    background: var(--bg-secondary);
+    border-left: 4px solid var(--gold-primary);
+    box-shadow: var(--shadow-md);
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 500;
+    animation: toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    min-width: 280px;
+}
+
+@keyframes toastSlideIn {
+    from {
+        transform: translateX(50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.toast.success { border-left-color: var(--accent-green, #25D366); }
+.toast.success i { color: var(--accent-green, #25D366); }
+.toast.error { border-left-color: var(--accent-red, #ff4d4d); }
+.toast.error i { color: var(--accent-red, #ff4d4d); }
+.toast.info i { color: var(--gold-primary); }
+
+.toast i {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 1024px) {
+    .jewelry-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
+    }
+}
+
+@media (max-width: 768px) {
+    .jewelry-hero {
+        padding: 120px 0 80px;
+    }
+    .hero-title {
+        font-size: 2.2rem;
+    }
+    .toolbar-wrapper {
+        padding: 16px;
+    }
+    .filter-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .category-tabs {
+        justify-content: center;
+    }
+    .sort-wrapper {
+        justify-content: space-between;
+    }
+    .jewelry-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+}

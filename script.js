@@ -1,6 +1,6 @@
 /* ==========================================================================
    Neha's GlamUp - Interactive Script File
-   Dynamic rendering, Tab switching, WhatsApp redirect, Slider, and Scroll animations.
+   Dynamic rendering, Tab switching, WhatsApp redirect, and Scroll animations.
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -9,7 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
 
     // --- Global Configurations ---
-    const WHATSAPP_NUMBER = "917337480803"; // Primary bookings number (no + or spaces)
+    const WHATSAPP_NUMBER = "917337480803"; // Primary bookings number
+    let servicesData = typeof services !== 'undefined' ? services : [];
 
     // --- Navigation & Header ---
     const header = document.getElementById('header');
@@ -136,185 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- Highlighted Korean Jewelry Slider ---
-    const koreanSlider = document.getElementById('korean-slider');
-    const prevBtn = document.getElementById('slider-prev-btn');
-    const nextBtn = document.getElementById('slider-next-btn');
-    const dotsContainer = document.getElementById('slider-dots-container');
-
-    let currentSlideIndex = 0;
-    let autoPlayInterval;
-    let touchStartX = 0;
-    let touchEndX = 0;
-
-    const koreanItems = jewelry.filter(item => item.isKorean === true);
-
-    const getVisibleSlides = () => {
-        if (window.innerWidth <= 768) return 1;
-        if (window.innerWidth <= 1024) return 2;
-        return 3;
-    };
-
-    const initKoreanSlider = () => {
-        if (!koreanSlider) return;
-
-        koreanSlider.innerHTML = '';
-
-        koreanItems.forEach((item, index) => {
-            const slide = document.createElement('div');
-            slide.className = 'slide-item';
-
-            const whatsappMessage = `Hi Neha, I am interested in the unique Korean jewelry piece "${item.name}". Please let me know its availability! Thank you.`;
-            const waUrl = generateWhatsAppUrl(whatsappMessage);
-
-            slide.innerHTML = `
-                <div class="slide-img-container" onclick="openLightbox('${item.image}', '${item.name}', '${waUrl}')">
-                    <img src="${item.image}" alt="${item.name}" class="slide-img" loading="lazy">
-                    <span class="slide-badge">Unique Collection</span>
-                    <span class="p-price-tag"><span class="original-price">₹500</span> ₹250</span>
-                </div>
-                <div class="slide-details">
-                    <h3 class="slide-name">${item.name}</h3>
-                    <p class="slide-desc">${item.description}</p>
-                    <div class="slide-action">
-                        <a href="${waUrl}" target="_blank" class="btn btn-primary" onclick="event.stopPropagation()">
-                            Enquire on WhatsApp <i data-lucide="message-circle"></i>
-                        </a>
-                    </div>
-                </div>
-            `;
-            koreanSlider.appendChild(slide);
-        });
-
-        setupDots();
-        updateSliderPosition();
-        startAutoPlay();
-
-        // Event Listeners
-        prevBtn.addEventListener('click', () => {
-            moveSlider('prev');
-            resetAutoPlay();
-        });
-
-        nextBtn.addEventListener('click', () => {
-            moveSlider('next');
-            resetAutoPlay();
-        });
-
-        // Pause on hover
-        koreanSlider.addEventListener('mouseenter', stopAutoPlay);
-        koreanSlider.addEventListener('mouseleave', startAutoPlay);
-
-        // Touch events for mobile swiping
-        koreanSlider.addEventListener('touchstart', (e) => {
-            touchStartX = e.changedTouches[0].screenX;
-        }, { passive: true });
-
-        koreanSlider.addEventListener('touchend', (e) => {
-            touchEndX = e.changedTouches[0].screenX;
-            handleSwipe();
-        }, { passive: true });
-    };
-
-    const moveSlider = (direction) => {
-        const visibleSlides = getVisibleSlides();
-        const maxIndex = Math.max(0, koreanItems.length - visibleSlides);
-
-        if (direction === 'next') {
-            if (currentSlideIndex >= maxIndex) {
-                currentSlideIndex = 0; // Wrap around to start
-            } else {
-                currentSlideIndex++;
-            }
-        } else if (direction === 'prev') {
-            if (currentSlideIndex <= 0) {
-                currentSlideIndex = maxIndex; // Wrap around to end
-            } else {
-                currentSlideIndex--;
-            }
-        }
-        updateSliderPosition();
-    };
-
-    const updateSliderPosition = () => {
-        const visibleSlides = getVisibleSlides();
-        const slideWidth = 100 / visibleSlides;
-        koreanSlider.style.transform = `translateX(-${currentSlideIndex * slideWidth}%)`;
-        updateDots();
-    };
-
-    const setupDots = () => {
-        if (!dotsContainer) return;
-        dotsContainer.innerHTML = '';
-
-        const visibleSlides = getVisibleSlides();
-        const totalDots = Math.ceil(koreanItems.length / visibleSlides);
-
-        for (let i = 0; i < totalDots; i++) {
-            const dot = document.createElement('button');
-            dot.className = 'slider-dot';
-            if (i === 0) dot.classList.add('active');
-            dot.setAttribute('aria-label', `Go to slide page ${i + 1}`);
-            dot.addEventListener('click', () => {
-                const maxIndex = Math.max(0, koreanItems.length - visibleSlides);
-                currentSlideIndex = Math.min(i * visibleSlides, maxIndex);
-                updateSliderPosition();
-                resetAutoPlay();
-            });
-            dotsContainer.appendChild(dot);
-        }
-    };
-
-    const updateDots = () => {
-        if (!dotsContainer) return;
-        const visibleSlides = getVisibleSlides();
-        const activeDotIndex = Math.floor(currentSlideIndex / visibleSlides);
-
-        const dots = dotsContainer.querySelectorAll('.slider-dot');
-        dots.forEach((dot, index) => {
-            if (index === activeDotIndex) {
-                dot.classList.add('active');
-            } else {
-                dot.classList.remove('active');
-            }
-        });
-    };
-
-    const handleSwipe = () => {
-        const threshold = 50; // min distance for swipe
-        if (touchStartX - touchEndX > threshold) {
-            moveSlider('next');
-            resetAutoPlay();
-        } else if (touchEndX - touchStartX > threshold) {
-            moveSlider('prev');
-            resetAutoPlay();
-        }
-    };
-
-    const startAutoPlay = () => {
-        stopAutoPlay();
-        autoPlayInterval = setInterval(() => {
-            moveSlider('next');
-        }, 3000);
-    };
-
-    const stopAutoPlay = () => {
-        if (autoPlayInterval) {
-            clearInterval(autoPlayInterval);
-        }
-    };
-
-    const resetAutoPlay = () => {
-        stopAutoPlay();
-        startAutoPlay();
-    };
-
-    window.addEventListener('resize', () => {
-        setupDots();
-        updateSliderPosition();
-    });
-
-    // --- Dynamic Catalog Rendering (Services vs Renting vs Selling) ---
+    // --- Dynamic Services Catalog Rendering ---
     const catalogGrid = document.getElementById('catalog-grid');
 
     window.switchTab = (tabType) => {
@@ -324,10 +147,6 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('tab-makeup').classList.add('active');
         } else if (tabType === 'beautician') {
             document.getElementById('tab-beautician').classList.add('active');
-        } else if (tabType === 'jewelry-rent') {
-            document.getElementById('tab-jewelry-rent').classList.add('active');
-        } else if (tabType === 'jewelry-sale') {
-            document.getElementById('tab-jewelry-sale').classList.add('active');
         }
 
         catalogGrid.classList.add('fade-out');
@@ -339,111 +158,43 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const renderCatalog = (tabType) => {
+        if (!catalogGrid) return;
         catalogGrid.innerHTML = '';
         
-        if (tabType === 'makeup' || tabType === 'beautician') {
-            const filteredServices = services.filter(service => service.type === tabType);
+        const filteredServices = servicesData.filter(service => service.type === tabType);
+        
+        filteredServices.forEach((service, index) => {
+            const card = document.createElement('div');
+            card.className = 'card service-card';
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = `opacity 0.5s ease ${index * 0.05}s, transform 0.5s ease ${index * 0.05}s`;
             
-            filteredServices.forEach((service, index) => {
-                const card = document.createElement('div');
-                card.className = 'card service-card';
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(20px)';
-                card.style.transition = `opacity 0.5s ease ${index * 0.05}s, transform 0.5s ease ${index * 0.05}s`;
-                
-                const enquiryMessage = `Hi Neha, I would like to book the "${service.title}" service in Hyderabad. Please share your availability and quote details. Thank you!`;
-                const waUrl = generateWhatsAppUrl(enquiryMessage);
-                
-                card.innerHTML = `
-                    <div class="s-header">
-                        <div class="s-icon">${service.icon}</div>
-                        <div>
-                            <span class="s-category">${service.category}</span>
-                            <h3 class="s-title">${service.title}</h3>
-                        </div>
+            const enquiryMessage = `Hi Neha, I would like to book the "${service.title}" service in Hyderabad. Please share your availability and quote details. Thank you!`;
+            const waUrl = generateWhatsAppUrl(enquiryMessage);
+            
+            card.innerHTML = `
+                <div class="s-header">
+                    <div class="s-icon">${service.icon}</div>
+                    <div>
+                        <span class="s-category">${service.category}</span>
+                        <h3 class="s-title">${service.title}</h3>
                     </div>
-                    <p class="s-description">${service.description}</p>
-                    <div class="s-footer">
-                        <a href="${waUrl}" target="_blank" class="btn btn-outline" id="btn-enquire-${service.id}">
-                            Enquire & Book <i data-lucide="message-square"></i>
-                        </a>
-                    </div>
-                `;
-                
-                catalogGrid.appendChild(card);
-            });
+                </div>
+                <p class="s-description">${service.description}</p>
+                <div class="s-footer">
+                    <a href="${waUrl}" target="_blank" class="btn btn-outline" id="btn-enquire-${service.id}">
+                        Enquire & Book <i data-lucide="message-square"></i>
+                    </a>
+                </div>
+            `;
             
-        } else {
-            const filteredJewelry = jewelry.filter(item => item.category === (tabType === 'jewelry-rent' ? 'renting' : 'selling'));
-            
-            filteredJewelry.forEach((item, index) => {
-                const card = document.createElement('div');
-                card.className = 'card product-card';
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(20px)';
-                card.style.transition = `opacity 0.5s ease ${index * 0.04}s, transform 0.5s ease ${index * 0.04}s`;
-                
-                let actionBadge = 'Available for Sale';
-                
-                if (item.category === 'renting') {
-                    actionBadge = 'Available for Rent';
-                } else if (item.isKorean) {
-                    actionBadge = 'Unique Design';
-                }
-                
-                const whatsappMessage = item.isKorean 
-                    ? `Hi Neha, I am interested in the unique Korean jewelry piece "${item.name}". Please let me know its availability! Thank you.`
-                    : `Hi Neha, I am interested in the jewelry item "${item.name}" listed under ${item.category === 'renting' ? 'Renting' : 'Selling'}. Can you please share more details? Thanks!`;
-                    
-                const waUrl = generateWhatsAppUrl(whatsappMessage);
-                
-                // Different layout for selling (WhatsApp on top, price at bottom) vs renting
-                if (item.category === 'selling') {
-                    card.innerHTML = `
-                        <div class="p-img-container" onclick="openLightbox('${item.image}', '${item.name}', '${waUrl}')" style="cursor: pointer;">
-                            <img src="${item.image}" alt="${item.name}" class="p-img" loading="lazy">
-                            <span class="p-badge">${actionBadge}</span>
-                            <a href="${waUrl}" target="_blank" class="card-wa-float" onclick="event.stopPropagation()" aria-label="Enquire on WhatsApp">
-                                <i data-lucide="message-circle"></i>
-                            </a>
-                        </div>
-                        <div class="p-details">
-                            <h3 class="p-name">${item.name}</h3>
-                            <p class="p-desc">${item.description}</p>
-                            <div class="p-bottom-price">
-                                <span class="p-offer-price"><span class="original-price">₹500</span> ₹250</span>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    // Renting cards - keep existing layout with price tag and full button
-                    let priceHtml = item.price ? `<span class="p-price-tag">${item.price}</span>` : '';
-                    
-                    card.innerHTML = `
-                        <div class="p-img-container" onclick="openLightbox('${item.image}', '${item.name}', '${waUrl}')" style="cursor: pointer;">
-                            <img src="${item.image}" alt="${item.name}" class="p-img" loading="lazy">
-                            <span class="p-badge">${actionBadge}</span>
-                            ${priceHtml}
-                        </div>
-                        <div class="p-details">
-                            <h3 class="p-name">${item.name}</h3>
-                            <p class="p-desc">${item.description}</p>
-                            <div class="p-action">
-                                <a href="${waUrl}" target="_blank" class="btn btn-primary" id="btn-wa-product-${item.id}">
-                                    Enquire Renting <i data-lucide="message-circle"></i>
-                                </a>
-                            </div>
-                        </div>
-                    `;
-                }
-                
-                catalogGrid.appendChild(card);
-            });
-        }
+            catalogGrid.appendChild(card);
+        });
         
         lucide.createIcons();
         
-        // Trigger card animations reliably using rAF (fixes blank on mobile first load)
+        // Trigger animations reliably
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {
                 const cards = catalogGrid.querySelectorAll('.card');
@@ -455,7 +206,31 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+    // --- Dynamic API Fetching with Caching Prevention ---
+    const fetchLiveProducts = async () => {
+        try {
+            // Fetch live data directly from api (forces bypassing of cache if server is running)
+            const res = await fetch('/api/products');
+            if (res.ok) {
+                const data = await res.json();
+                if (data.services && data.services.length > 0) {
+                    servicesData = data.services;
+                    console.log('Successfully fetched live services data from API');
+                    
+                    // Re-render currently active tab
+                    const activeTabBtn = document.querySelector('.tab-btn.active');
+                    if (activeTabBtn) {
+                        const tabType = activeTabBtn.id === 'tab-beautician' ? 'beautician' : 'makeup';
+                        renderCatalog(tabType);
+                    }
+                }
+            }
+        } catch (err) {
+            console.log('Server API not running. Falling back to products.js static arrays.');
+        }
+    };
+
     // --- Page Initialization ---
-    initKoreanSlider();
     renderCatalog('makeup');
+    fetchLiveProducts();
 });

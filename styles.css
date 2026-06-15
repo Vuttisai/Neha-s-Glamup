@@ -2103,3 +2103,28 @@ a.value:hover {
     }
 }
 
+.nav-social-link {
+    color: var(--text-secondary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 18px;
+    transition: var(--transition-fast);
+}
+
+.nav-social-link:hover {
+    color: var(--gold-primary);
+    transform: scale(1.15);
+}
+
+.nav-social-link i {
+    width: 20px;
+    height: 20px;
+}
+
+@media (max-width: 480px) {
+    .nav-social-link {
+        margin-right: 8px;
+    }
+}
+
