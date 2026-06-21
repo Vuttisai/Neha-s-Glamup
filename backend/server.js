@@ -71,6 +71,11 @@ app.use('/assets', express.static(path.join(__dirname, 'assets')));
 // Serve admin panel statically at /admin
 app.use('/admin', express.static(path.join(__dirname, 'admin')));
 
+// Redirect /admin.html to /admin/ (prevents broken link from old root file layout)
+app.get('/admin.html', (req, res) => {
+    res.redirect('/admin/');
+});
+
 // Serve products.js with caching disabled so edits reflect immediately
 app.get('/products.js', (req, res) => {
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');

@@ -17,6 +17,17 @@ function resolveAdminImageUrl(imagePath) {
     return imagePath;
 }
 
+// Helper to call Lucide icon rendering safely (prevents script crashes if CDN is offline or blocked)
+function createIconsSafely() {
+    try {
+        if (typeof lucide !== 'undefined' && lucide.createIcons) {
+            lucide.createIcons();
+        }
+    } catch (err) {
+        console.warn('Lucide icon rendering failed:', err);
+    }
+}
+
 
 // Lightbox state
 let lightboxZoom = 1;
@@ -30,7 +41,7 @@ let lightboxDragStartY = 0;
 // INITIALIZATION
 // =============================================
 document.addEventListener('DOMContentLoaded', () => {
-    lucide.createIcons();
+    createIconsSafely();
     initializeAuth();
     
     // Drag & Drop image files
@@ -856,7 +867,7 @@ function renderTable() {
         }
     }
     
-    lucide.createIcons();
+    createIconsSafely();
 }
 
 // =============================================
@@ -877,7 +888,7 @@ function openAddModal() {
     
     toggleFormFields();
     document.getElementById('product-modal').classList.remove('hidden');
-    lucide.createIcons();
+    createIconsSafely();
 }
 
 function openEditModal(type, id) {
@@ -956,7 +967,7 @@ function openEditModal(type, id) {
     
     toggleFormFields();
     document.getElementById('product-modal').classList.remove('hidden');
-    lucide.createIcons();
+    createIconsSafely();
 }
 
 function closeModal() {
@@ -1240,7 +1251,7 @@ async function handleFormSubmit(e) {
             
             if (currentSection !== 'dashboard') {
                 renderTable();
-            }         }
+            }
         } else if (res.status === 401) {
             showToast('Session expired. Please sign in again.', 'error');
             clearSessionData();
@@ -1255,7 +1266,7 @@ async function handleFormSubmit(e) {
     } finally {
         saveButton.disabled = false;
         saveButton.innerHTML = originalText;
-        lucide.createIcons();
+        createIconsSafely();
     }
 }
 
@@ -1373,7 +1384,7 @@ function showToast(message, type = 'info') {
     `;
     
     container.appendChild(toast);
-    lucide.createIcons();
+    createIconsSafely();
     
     setTimeout(() => {
         toast.style.transform = 'translateX(100px)';
@@ -1449,7 +1460,7 @@ function renderCategoriesEditList() {
         container.appendChild(div);
     });
     
-    lucide.createIcons();
+    createIconsSafely();
 }
 
 // Add a category
