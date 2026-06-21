@@ -4,6 +4,7 @@ let currentSection = 'dashboard';
 let currentCategoryFilter = 'all';
 let searchQuery = '';
 let selectedImageFile = null;
+let selectedShowcaseFile = null;
 let searchDebounceTimer = null;
 let adminSession = null; // { token, user: { name, email, picture } }
 
@@ -362,20 +363,44 @@ function closeSidebar() {
 // =============================================
 // IMAGE LIGHTBOX
 // =============================================
-function openLightbox(src) {
+function openLightbox(src, type = 'image') {
     const overlay = document.getElementById('image-lightbox');
     const img = document.getElementById('lightbox-img');
-    img.src = src;
-    lightboxZoom = 1;
-    lightboxPanX = 0;
-    lightboxPanY = 0;
-    applyLightboxTransform();
+    const video = document.getElementById('lightbox-video');
+    const controls = document.getElementById('lightbox-zoom-controls');
+
+    if (type === 'video') {
+        img.style.display = 'none';
+        video.src = src;
+        video.style.display = 'block';
+        if (controls) controls.style.display = 'none';
+        video.play().catch(e => console.log('Video play auto-blocked:', e));
+    } else {
+        if (video) {
+            video.style.display = 'none';
+            video.pause();
+            video.src = '';
+        }
+        img.src = src;
+        img.style.display = 'block';
+        if (controls) controls.style.display = 'flex';
+        lightboxZoom = 1;
+        lightboxPanX = 0;
+        lightboxPanY = 0;
+        applyLightboxTransform();
+    }
+
     overlay.classList.add('active');
     document.body.style.overflow = 'hidden';
 }
 
 function closeLightbox() {
     const overlay = document.getElementById('image-lightbox');
+    const video = document.getElementById('lightbox-video');
+    if (video) {
+        video.pause();
+        video.src = '';
+    }
     overlay.classList.remove('active');
     document.body.style.overflow = '';
 }
@@ -488,6 +513,14 @@ function switchSection(section, event) {
         catalogSection.classList.remove('hidden');
         document.getElementById('btn-manage-categories').style.display = 'none';
         setupFilters(['All Services', 'Makeup Artistry', 'Beautician Services', 'Mehendi Designs']);
+        renderTable();
+    } else if (section === 'showcase') {
+        pageTitle.textContent = 'Work Showcase';
+        pageSubtitle.textContent = 'Manage photos and videos of your work and showcase them on your website gallery.';
+        dbSection.classList.add('hidden');
+        catalogSection.classList.remove('hidden');
+        document.getElementById('btn-manage-categories').style.display = 'none';
+        setupFilters(['All Showcase', 'Photos Only', 'Videos Only']);
         renderTable();
     }
 
@@ -701,6 +734,126 @@ function renderTable() {
                 mobileCards.appendChild(card);
             });
         }
+    } else if (currentSection === 'showcase') {
+        tableHeaders.innerHTML = `
+            <th style="width: 100px;">Media</th>
+            <th>Title</th>
+            <th style="width: 120px;">Media Type</th>
+            <th style="width: 120px; text-align: center;">Order</th>
+            <th>Description</th>
+            <th style="width: 150px; text-align: center;">Actions</th>
+        `;
+
+        items = allProducts.showcase || [];
+
+        if (currentCategoryFilter !== 'all') {
+            const filterType = currentCategoryFilter === 'Photos Only' ? 'image' : 'video';
+            items = items.filter(item => item.mediaType === filterType);
+        }
+
+        if (searchQuery) {
+            items = items.filter(item => 
+                item.title.toLowerCase().includes(searchQuery) ||
+                item.id.toLowerCase().includes(searchQuery) ||
+                (item.description && item.description.toLowerCase().includes(searchQuery))
+            );
+        }
+
+        items.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+        if (items.length === 0) {
+            emptyState.classList.remove('hidden');
+            document.querySelector('.table-container').classList.add('hidden');
+            mobileCards.innerHTML = '';
+        } else {
+            emptyState.classList.add('hidden');
+            document.querySelector('.table-container').classList.remove('hidden');
+
+            items.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                const resolvedMedia = resolveAdminImageUrl(item.mediaUrl);
+                const escapedMedia = resolvedMedia.replace(/'/g, "\\'");
+
+                let mediaPreviewHtml = '';
+                if (item.mediaType === 'video') {
+                    mediaPreviewHtml = `
+                        <div style="position: relative; width: 60px; height: 60px; cursor: pointer; display: inline-block;" onclick="openLightbox('${escapedMedia}', 'video')">
+                            <video src="${resolvedMedia}#t=0.5" class="table-img" style="object-fit: cover;" preload="metadata"></video>
+                            <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); border-radius: 4px;">
+                                <i data-lucide="play" style="width: 16px; height: 16px; color: var(--gold-primary);"></i>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    mediaPreviewHtml = `<img src="${resolvedMedia}" class="table-img" alt="${item.title}" onclick="openLightbox('${escapedMedia}', 'image')">`;
+                }
+
+                const orderControlHtml = `
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <span style="font-weight: 600;">${item.order || 0}</span>
+                        <div style="display: flex; flex-direction: column; gap: 2px;">
+                            <button class="btn btn-secondary btn-sm" style="padding: 2px 4px; line-height: 1;" onclick="moveShowcaseItem('${item.id}', 'up')" ${index === 0 ? 'disabled' : ''} title="Move Up"><i data-lucide="chevron-up" style="width: 12px; height: 12px;"></i></button>
+                            <button class="btn btn-secondary btn-sm" style="padding: 2px 4px; line-height: 1;" onclick="moveShowcaseItem('${item.id}', 'down')" ${index === items.length - 1 ? 'disabled' : ''} title="Move Down"><i data-lucide="chevron-down" style="width: 12px; height: 12px;"></i></button>
+                        </div>
+                    </div>
+                `;
+
+                tr.innerHTML = `
+                    <td>${mediaPreviewHtml}</td>
+                    <td><strong>${item.title}</strong><br><span class="text-muted" style="font-size:0.75rem;">${item.id}</span></td>
+                    <td><span class="badge ${item.mediaType === 'video' ? 'badge-gold' : 'badge-secondary'}">${item.mediaType === 'video' ? 'Video' : 'Photo'}</span></td>
+                    <td>${orderControlHtml}</td>
+                    <td><p class="text-muted" style="font-size:0.85rem; max-width:250px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${item.description}">${item.description || '-'}</p></td>
+                    <td style="text-align: center;">
+                        <div class="table-actions">
+                            <button class="btn btn-secondary btn-sm" onclick="openEditModal('showcase', '${item.id}')"><i data-lucide="edit-3" style="width:14px;height:14px;"></i> Edit</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteProduct('${item.id}')"><i data-lucide="trash-2" style="width:14px;height:14px;"></i> Delete</button>
+                        </div>
+                    </td>
+                `;
+                listBody.appendChild(tr);
+
+                const card = document.createElement('div');
+                card.className = 'mobile-card';
+                
+                let mobileMediaPreview = '';
+                if (item.mediaType === 'video') {
+                    mobileMediaPreview = `
+                        <div style="position: relative; width: 80px; height: 80px; flex-shrink: 0;" onclick="openLightbox('${escapedMedia}', 'video')">
+                            <video src="${resolvedMedia}#t=0.5" class="mobile-card-img" style="object-fit: cover;" preload="metadata"></video>
+                            <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); border-radius: var(--border-radius-sm);">
+                                <i data-lucide="play" style="width: 20px; height: 20px; color: var(--gold-primary);"></i>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    mobileMediaPreview = `<img src="${resolvedMedia}" class="mobile-card-img" alt="${item.title}" onclick="openLightbox('${escapedMedia}', 'image')">`;
+                }
+
+                card.innerHTML = `
+                    ${mobileMediaPreview}
+                    <div class="mobile-card-body">
+                        <div class="mobile-card-name">${item.title}</div>
+                        <div class="mobile-card-meta" style="display: flex; align-items: center; gap: 8px;">
+                            <span class="badge ${item.mediaType === 'video' ? 'badge-gold' : 'badge-secondary'}">${item.mediaType === 'video' ? 'Video' : 'Photo'}</span>
+                            <span style="font-size: 0.8rem; font-weight: 500;">Order: ${item.order || 0}</span>
+                        </div>
+                        ${item.description ? `<div class="mobile-card-desc">${item.description}</div>` : ''}
+                        <div class="mobile-card-actions" style="justify-content: space-between; align-items: center; width: 100%;">
+                            <div style="display: flex; gap: 6px;">
+                                <button class="btn btn-secondary btn-sm" onclick="moveShowcaseItem('${item.id}', 'up')" ${index === 0 ? 'disabled' : ''}><i data-lucide="chevron-up" style="width:12px;height:12px;"></i></button>
+                                <button class="btn btn-secondary btn-sm" onclick="moveShowcaseItem('${item.id}', 'down')" ${index === items.length - 1 ? 'disabled' : ''}><i data-lucide="chevron-down" style="width:12px;height:12px;"></i></button>
+                            </div>
+                            <div style="display: flex; gap: 6px;">
+                                <button class="btn btn-secondary btn-sm" onclick="openEditModal('showcase', '${item.id}')"><i data-lucide="edit-3" style="width:14px;height:14px;"></i></button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteProduct('${item.id}')"><i data-lucide="trash-2" style="width:14px;height:14px;"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                mobileCards.appendChild(card);
+            });
+        }
     }
     
     lucide.createIcons();
@@ -765,6 +918,40 @@ function openEditModal(type, id) {
             document.getElementById('form-service-icon').value = item.icon;
             document.getElementById('form-description').value = item.description;
         }
+    } else if (type === 'showcase') {
+        const item = allProducts.showcase.find(item => item.id === id);
+        if (item) {
+            document.getElementById('form-showcase-title').value = item.title || '';
+            document.getElementById('form-showcase-order').value = item.order || '';
+            document.getElementById('form-showcase-media-type').value = item.mediaType || 'image';
+            document.getElementById('form-description').value = item.description || '';
+
+            if (item.mediaUrl) {
+                const previewContainer = document.getElementById('showcase-preview-container');
+                const previewEl = document.getElementById('showcase-media-preview-el');
+                const label = document.getElementById('showcase-upload-label');
+                previewEl.innerHTML = '';
+                
+                const resolvedMedia = resolveAdminImageUrl(item.mediaUrl);
+                if (item.mediaType === 'video') {
+                    const videoEl = document.createElement('video');
+                    videoEl.src = resolvedMedia;
+                    videoEl.controls = true;
+                    videoEl.style.maxWidth = '100%';
+                    videoEl.style.maxHeight = '200px';
+                    previewEl.appendChild(videoEl);
+                } else {
+                    const imgEl = document.createElement('img');
+                    imgEl.src = resolvedMedia;
+                    imgEl.style.maxWidth = '100%';
+                    imgEl.style.maxHeight = '200px';
+                    imgEl.style.objectFit = 'contain';
+                    previewEl.appendChild(imgEl);
+                }
+                previewContainer.classList.remove('hidden');
+                label.textContent = "Uploaded showcase media is set";
+            }
+        }
     }
     
     toggleFormFields();
@@ -790,23 +977,47 @@ function resetForm() {
     const label = document.getElementById('upload-label');
     if (label) label.textContent = 'Drag & drop jewelry photo or click to browse';
     
+    // Reset Showcase Previews
+    const scPreviewContainer = document.getElementById('showcase-preview-container');
+    if (scPreviewContainer) scPreviewContainer.classList.add('hidden');
+    const scPreviewEl = document.getElementById('showcase-media-preview-el');
+    if (scPreviewEl) scPreviewEl.innerHTML = '';
+    const scLabel = document.getElementById('showcase-upload-label');
+    if (scLabel) scLabel.textContent = 'Drag & drop photo or video or click to browse';
+    
     selectedImageFile = null;
+    selectedShowcaseFile = null;
 }
 
 function toggleFormFields() {
     const type = document.getElementById('form-type').value;
     const jewelryFields = document.getElementById('jewelry-fields-group');
     const serviceFields = document.getElementById('service-fields-group');
+    const showcaseFields = document.getElementById('showcase-fields-group');
     
     if (type === 'jewelry') {
         jewelryFields.classList.remove('hidden');
         serviceFields.classList.add('hidden');
+        if (showcaseFields) showcaseFields.classList.add('hidden');
         const itemId = document.getElementById('form-item-id').value;
         document.getElementById('form-jewelry-image').required = !itemId;
-    } else {
+        const mediaInput = document.getElementById('form-showcase-media');
+        if (mediaInput) mediaInput.required = false;
+    } else if (type === 'service') {
         jewelryFields.classList.add('hidden');
         serviceFields.classList.remove('hidden');
+        if (showcaseFields) showcaseFields.classList.add('hidden');
         document.getElementById('form-jewelry-image').required = false;
+        const mediaInput = document.getElementById('form-showcase-media');
+        if (mediaInput) mediaInput.required = false;
+    } else if (type === 'showcase') {
+        jewelryFields.classList.add('hidden');
+        serviceFields.classList.add('hidden');
+        if (showcaseFields) showcaseFields.classList.remove('hidden');
+        const itemId = document.getElementById('form-item-id').value;
+        document.getElementById('form-jewelry-image').required = false;
+        const mediaInput = document.getElementById('form-showcase-media');
+        if (mediaInput) mediaInput.required = !itemId;
     }
 }
 
@@ -843,8 +1054,67 @@ function removeImagePreview(event) {
     input.required = !itemId;
 }
 
-// =============================================
-// FORM SUBMISSION (Optimistic Updates)
+function triggerShowcaseInput() {
+    document.getElementById('form-showcase-media').click();
+}
+
+function previewShowcaseMedia(event) {
+    const input = event.target;
+    if (input.files && input.files[0]) {
+        selectedShowcaseFile = input.files[0];
+        
+        const previewContainer = document.getElementById('showcase-preview-container');
+        const previewEl = document.getElementById('showcase-media-preview-el');
+        const label = document.getElementById('showcase-upload-label');
+        
+        previewEl.innerHTML = '';
+        
+        const fileType = selectedShowcaseFile.type;
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            if (fileType.startsWith('video/')) {
+                const videoEl = document.createElement('video');
+                videoEl.src = e.target.result;
+                videoEl.controls = true;
+                videoEl.style.maxWidth = '100%';
+                videoEl.style.maxHeight = '200px';
+                videoEl.style.outline = 'none';
+                previewEl.appendChild(videoEl);
+                document.getElementById('form-showcase-media-type').value = 'video';
+            } else {
+                const imgEl = document.createElement('img');
+                imgEl.src = e.target.result;
+                imgEl.style.maxWidth = '100%';
+                imgEl.style.maxHeight = '200px';
+                imgEl.style.objectFit = 'contain';
+                previewEl.appendChild(imgEl);
+                document.getElementById('form-showcase-media-type').value = 'image';
+            }
+            previewContainer.classList.remove('hidden');
+            label.textContent = "Selected file: " + selectedShowcaseFile.name;
+        };
+        reader.readAsDataURL(selectedShowcaseFile);
+    }
+}
+
+function removeShowcasePreview(event) {
+    if (event) event.stopPropagation();
+    const input = document.getElementById('form-showcase-media');
+    if (input) input.value = '';
+    
+    const previewContainer = document.getElementById('showcase-preview-container');
+    if (previewContainer) previewContainer.classList.add('hidden');
+    const previewEl = document.getElementById('showcase-media-preview-el');
+    if (previewEl) previewEl.innerHTML = '';
+    const label = document.getElementById('showcase-upload-label');
+    if (label) label.textContent = 'Drag & drop photo or video or click to browse';
+    
+    selectedShowcaseFile = null;
+    const itemId = document.getElementById('form-item-id').value;
+    if (input) input.required = !itemId;
+}
+
 // =============================================
 async function handleFormSubmit(e) {
     e.preventDefault();
@@ -880,7 +1150,7 @@ async function handleFormSubmit(e) {
         if (imageInput.files[0]) {
             formData.append('image', imageInput.files[0]);
         }
-    } else {
+    } else if (type === 'service') {
         const title = document.getElementById('form-service-title').value;
         const category = document.getElementById('form-service-category').value;
         const icon = document.getElementById('form-service-icon').value;
@@ -895,9 +1165,31 @@ async function handleFormSubmit(e) {
         formData.append('category', category);
         formData.append('icon', icon);
         formData.append('description', description);
+    } else if (type === 'showcase') {
+        const title = document.getElementById('form-showcase-title').value;
+        const order = document.getElementById('form-showcase-order').value;
+        const mediaType = document.getElementById('form-showcase-media-type').value;
+        const description = document.getElementById('form-description').value;
+        const mediaInput = document.getElementById('form-showcase-media');
+
+        if (!title) {
+            showToast('Showcase Title is required.', 'error');
+            return;
+        }
+        
+        formData.append('title', title);
+        formData.append('order', order);
+        formData.append('mediaType', mediaType);
+        formData.append('description', description);
+        
+        if (mediaInput.files[0]) {
+            formData.append('media', mediaInput.files[0]);
+        }
     }
     
-    const url = isEdit ? `/api/products/${id}` : '/api/products';
+    const url = type === 'showcase'
+        ? (isEdit ? `/api/showcase/${id}` : '/api/showcase')
+        : (isEdit ? `/api/products/${id}` : '/api/products');
     const method = isEdit ? 'PUT' : 'POST';
     
     const saveButton = document.getElementById('btn-save-submit');
@@ -925,22 +1217,30 @@ async function handleFormSubmit(e) {
                 } else {
                     allProducts.jewelry.push(result.item);
                 }
-            } else {
+            } else if (type === 'service') {
                 if (isEdit) {
                     const idx = allProducts.services.findIndex(s => s.id === id);
                     if (idx !== -1) allProducts.services[idx] = result.item;
                 } else {
                     allProducts.services.push(result.item);
                 }
+            } else if (type === 'showcase') {
+                if (!allProducts.showcase) allProducts.showcase = [];
+                if (isEdit) {
+                    const idx = allProducts.showcase.findIndex(s => s.id === id);
+                    if (idx !== -1) allProducts.showcase[idx] = result.item;
+                } else {
+                    allProducts.showcase.push(result.item);
+                }
             }
-
+ 
             updateDashboardMetrics();
-            showToast(isEdit ? 'Product updated!' : 'New product added!', 'success');
+            showToast(isEdit ? 'Showcase item updated!' : 'New showcase item added!', 'success');
             closeModal();
             
             if (currentSection !== 'dashboard') {
                 renderTable();
-            }
+            }         }
         } else if (res.status === 401) {
             showToast('Session expired. Please sign in again.', 'error');
             clearSessionData();
@@ -963,25 +1263,33 @@ async function handleFormSubmit(e) {
 // DELETE (Optimistic)
 // =============================================
 async function deleteProduct(id) {
-    if (!confirm('Are you sure you want to permanently delete this product?')) return;
+    if (!confirm('Are you sure you want to permanently delete this item?')) return;
+    
+    const isShowcase = id.startsWith('showcase-');
+    const url = isShowcase ? `/api/showcase/${id}` : `/api/products/${id}`;
     
     try {
-        const res = await fetch(`/api/products/${id}`, {
+        const res = await fetch(url, {
             method: 'DELETE',
             headers: { 'x-admin-session': getSessionToken() }
         });
         
         if (res.ok) {
-            const jIdx = allProducts.jewelry.findIndex(j => j.id === id);
-            if (jIdx !== -1) {
-                allProducts.jewelry.splice(jIdx, 1);
+            if (isShowcase) {
+                const sIdx = allProducts.showcase.findIndex(s => s.id === id);
+                if (sIdx !== -1) allProducts.showcase.splice(sIdx, 1);
             } else {
-                const sIdx = allProducts.services.findIndex(s => s.id === id);
-                if (sIdx !== -1) allProducts.services.splice(sIdx, 1);
+                const jIdx = allProducts.jewelry.findIndex(j => j.id === id);
+                if (jIdx !== -1) {
+                    allProducts.jewelry.splice(jIdx, 1);
+                } else {
+                    const sIdx = allProducts.services.findIndex(s => s.id === id);
+                    if (sIdx !== -1) allProducts.services.splice(sIdx, 1);
+                }
             }
 
             updateDashboardMetrics();
-            showToast('Product deleted.', 'success');
+            showToast('Item deleted.', 'success');
             if (currentSection !== 'dashboard') renderTable();
         } else if (res.status === 401) {
             showToast('Session expired. Please sign in again.', 'error');
@@ -990,10 +1298,60 @@ async function deleteProduct(id) {
             initGoogleSignIn();
         } else {
             const err = await res.json();
-            showToast(err.error || 'Failed to delete.', 'error');
         }
     } catch (err) {
         showToast('Network error.', 'error');
+    }
+}
+
+async function moveShowcaseItem(id, direction) {
+    const items = allProducts.showcase || [];
+    const idx = items.findIndex(item => item.id === id);
+    if (idx === -1) return;
+
+    if (direction === 'up' && idx > 0) {
+        // Swap with previous
+        const temp = items[idx];
+        items[idx] = items[idx - 1];
+        items[idx - 1] = temp;
+    } else if (direction === 'down' && idx < items.length - 1) {
+        // Swap with next
+        const temp = items[idx];
+        items[idx] = items[idx + 1];
+        items[idx + 1] = temp;
+    } else {
+        return; // invalid movement
+    }
+
+    // Normalize order values to 1, 2, 3...
+    items.forEach((item, index) => {
+        item.order = index + 1;
+    });
+
+    // Optimistic table re-render
+    renderTable();
+
+    try {
+        const ids = items.map(item => item.id);
+        const res = await fetch('/api/showcase/reorder', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-admin-session': getSessionToken()
+            },
+            body: JSON.stringify({ ids })
+        });
+
+        if (!res.ok) {
+            showToast('Failed to save showcase order on server.', 'error');
+            // Re-load to revert to server state
+            loadProducts();
+        } else {
+            showToast('Showcase order saved.', 'success');
+        }
+    } catch (err) {
+        showToast('Network error while saving order.', 'error');
+        loadProducts();
     }
 }
 

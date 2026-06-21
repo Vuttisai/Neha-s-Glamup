@@ -342,67 +342,8 @@
                 <div class="heading-divider"></div>
             </div>
 
-            <div class="gallery-grid scroll-animate">
-                <div class="gallery-item" onclick="openLightbox('assets/owner.jpg', 'Bridal Styling')">
-                    <img src="assets/owner.jpg" alt="Makeup Look 1" class="gallery-img">
-                    <a href="https://wa.me/917337480803?text=Hi%20Neha%2C%20I%20saw%20your%20Bridal%20Styling%20in%20the%20gallery%20and%20I%27m%20interested.%20Please%20share%20more%20details!" target="_blank" class="gallery-wa-btn" onclick="event.stopPropagation()" aria-label="Enquire on WhatsApp">
-                        <i data-lucide="message-circle"></i>
-                    </a>
-                    <div class="gallery-bottom-bar">
-                        <span class="gallery-label">Bridal Styling</span>
-                        <span class="gallery-price">Custom Quote</span>
-                    </div>
-                </div>
-                <div class="gallery-item" onclick="openLightbox('assets/jewelry_kundan_set.jpg', 'Royal Kundan Bridal Set')">
-                    <img src="assets/jewelry_kundan_set.jpg" alt="Royal Kundan Jewelry" class="gallery-img">
-                    <a href="https://wa.me/917337480803?text=Hi%20Neha%2C%20I%20saw%20the%20Royal%20Kundan%20Bridal%20Set%20and%20I%27m%20interested.%20Please%20share%20rental%20details!" target="_blank" class="gallery-wa-btn" onclick="event.stopPropagation()" aria-label="Enquire on WhatsApp">
-                        <i data-lucide="message-circle"></i>
-                    </a>
-                    <div class="gallery-bottom-bar">
-                        <span class="gallery-label">Kundan Bridal Set</span>
-                        <span class="gallery-price">Rent: ₹2,499/day</span>
-                    </div>
-                </div>
-                <div class="gallery-item" onclick="openLightbox('assets/jewelry_temple_haram.jpg', 'Temple Gold Haram')">
-                    <img src="assets/jewelry_temple_haram.jpg" alt="Temple Gold Jewelry" class="gallery-img">
-                    <a href="https://wa.me/917337480803?text=Hi%20Neha%2C%20I%20saw%20the%20Temple%20Gold%20Haram%20and%20I%27m%20interested.%20Please%20share%20rental%20details!" target="_blank" class="gallery-wa-btn" onclick="event.stopPropagation()" aria-label="Enquire on WhatsApp">
-                        <i data-lucide="message-circle"></i>
-                    </a>
-                    <div class="gallery-bottom-bar">
-                        <span class="gallery-label">Temple Gold Haram</span>
-                        <span class="gallery-price">Rent: ₹1,999/day</span>
-                    </div>
-                </div>
-                <div class="gallery-item" onclick="openLightbox('assets/jewelry_guttapusalu.jpg', 'Antique Guttapusalu Choker')">
-                    <img src="assets/jewelry_guttapusalu.jpg" alt="Antique Guttapusalu Jewelry" class="gallery-img">
-                    <a href="https://wa.me/917337480803?text=Hi%20Neha%2C%20I%20saw%20the%20Guttapusalu%20Choker%20and%20I%27m%20interested.%20Please%20share%20rental%20details!" target="_blank" class="gallery-wa-btn" onclick="event.stopPropagation()" aria-label="Enquire on WhatsApp">
-                        <i data-lucide="message-circle"></i>
-                    </a>
-                    <div class="gallery-bottom-bar">
-                        <span class="gallery-label">Guttapusalu Choker</span>
-                        <span class="gallery-price">Rent: ₹1,799/day</span>
-                    </div>
-                </div>
-                <div class="gallery-item" onclick="openLightbox('assets/jewelry_cz_bangles.jpg', 'Sparkling CZ Stone Bangles')">
-                    <img src="assets/jewelry_cz_bangles.jpg" alt="Cubic Zirconia Bangles" class="gallery-img">
-                    <a href="https://wa.me/917337480803?text=Hi%20Neha%2C%20I%20saw%20the%20CZ%20Stone%20Bangles%20and%20I%27m%20interested.%20Please%20share%20more%20details!" target="_blank" class="gallery-wa-btn" onclick="event.stopPropagation()" aria-label="Enquire on WhatsApp">
-                        <i data-lucide="message-circle"></i>
-                    </a>
-                    <div class="gallery-bottom-bar">
-                        <span class="gallery-label">CZ Bangles Set</span>
-                        <span class="gallery-price">Enquire Price</span>
-                    </div>
-                </div>
-                <div class="gallery-item" onclick="openLightbox('assets/jewelry_polki_jhumkas.jpg', 'Luxury Polki Jhumkas')">
-                    <img src="assets/jewelry_polki_jhumkas.jpg" alt="Polki Pearl Jhumkas" class="gallery-img">
-                    <a href="https://wa.me/917337480803?text=Hi%20Neha%2C%20I%20saw%20the%20Luxury%20Polki%20Jhumkas%20and%20I%27m%20interested.%20Please%20share%20more%20details!" target="_blank" class="gallery-wa-btn" onclick="event.stopPropagation()" aria-label="Enquire on WhatsApp">
-                        <i data-lucide="message-circle"></i>
-                    </a>
-                    <div class="gallery-bottom-bar">
-                        <span class="gallery-label">Polki Jhumkas</span>
-                        <span class="gallery-price">Enquire Price</span>
-                    </div>
-                </div>
+            <div class="gallery-grid scroll-animate" id="gallery-grid">
+                <!-- Dynamically populated via javascript -->
             </div>
         </div>
     </section>
@@ -412,6 +353,7 @@
         <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
         <div class="lightbox-content" onclick="event.stopPropagation()">
             <img src="" alt="" id="lightbox-img">
+            <video id="lightbox-video" controls style="display: none; max-width: 100%; max-height: 70vh; border-radius: var(--border-radius-md); box-shadow: var(--shadow-lg); outline: none;"></video>
             <p id="lightbox-caption"></p>
             <a href="" target="_blank" class="btn btn-primary" id="lightbox-wa-btn"
                 style="margin-top: 10px; display: none;">

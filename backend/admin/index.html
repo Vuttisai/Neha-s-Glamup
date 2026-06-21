@@ -64,6 +64,9 @@
                 <a href="#" class="nav-item" onclick="switchSection('services', event)">
                     <i data-lucide="sparkles"></i> Salon Services
                 </a>
+                <a href="#" class="nav-item" onclick="switchSection('showcase', event)" id="nav-showcase">
+                    <i data-lucide="image"></i> Work Showcase
+                </a>
                 <a href="/" class="nav-item exit-link">
                     <i data-lucide="external-link"></i> Go to Live Site
                 </a>
@@ -192,6 +195,7 @@
                     <select id="form-type" onchange="toggleFormFields()" required>
                         <option value="jewelry">Jewelry Item</option>
                         <option value="service">Salon/Spa Service</option>
+                        <option value="showcase">Work Showcase (Photo/Video)</option>
                     </select>
                 </div>
 
@@ -270,6 +274,41 @@
                     </div>
                 </div>
 
+                <!-- Showcase Fields -->
+                <div id="showcase-fields-group" class="hidden">
+                    <div class="form-row">
+                        <div class="form-group col-12">
+                            <label for="form-showcase-title">Showcase Title</label>
+                            <input type="text" id="form-showcase-title" placeholder="e.g. Elegant Bridal Face Glam">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-6">
+                            <label for="form-showcase-order">Display Order</label>
+                            <input type="number" id="form-showcase-order" placeholder="e.g. 1 (Optional)" min="1">
+                        </div>
+                        <div class="form-group col-6">
+                            <label for="form-showcase-media-type">Media Type</label>
+                            <select id="form-showcase-media-type">
+                                <option value="image">Photo (JPEG, PNG, WebP)</option>
+                                <option value="video">Video (MP4, WebM)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Showcase Media File</label>
+                        <div class="file-drop-zone" id="showcase-drop-zone" onclick="triggerShowcaseInput()">
+                            <i data-lucide="upload-cloud" class="upload-icon"></i>
+                            <p class="drop-text" id="showcase-upload-label">Drag & drop photo or video or click to browse</p>
+                            <input type="file" id="form-showcase-media" class="hidden" accept="image/*,video/*" onchange="previewShowcaseMedia(event)">
+                        </div>
+                        <div id="showcase-preview-container" class="image-preview-wrapper hidden">
+                            <div id="showcase-media-preview-el"></div>
+                            <button type="button" class="btn-remove-preview" onclick="removeShowcasePreview(event)"><i data-lucide="trash-2"></i> Remove</button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Common Description Field -->
                 <div class="form-group">
                     <label for="form-description">Description</label>
@@ -289,8 +328,9 @@
         <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
         <div class="lightbox-content">
             <img id="lightbox-img" class="lightbox-img" src="" alt="Full-size preview" draggable="false">
+            <video id="lightbox-video" class="lightbox-img" controls style="display: none; max-height: 80vh; max-width: 90%; border-radius: 4px; box-shadow: var(--shadow-lg); outline: none;"></video>
         </div>
-        <div class="lightbox-controls">
+        <div class="lightbox-controls" id="lightbox-zoom-controls">
             <button class="lightbox-zoom-btn" onclick="zoomLightbox(-1)" title="Zoom Out">&#8722;</button>
             <span class="lightbox-zoom-level" id="zoom-level">100%</span>
             <button class="lightbox-zoom-btn" onclick="zoomLightbox(1)" title="Zoom In">&#43;</button>

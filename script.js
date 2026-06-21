@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Global Configurations ---
     const WHATSAPP_NUMBER = "917337480803"; // Primary bookings number
     let servicesData = typeof services !== 'undefined' ? services : [];
+    let showcaseData = typeof showcase !== 'undefined' ? showcase : [];
 
     // --- Navigation & Header ---
     const header = document.getElementById('header');
@@ -117,12 +118,37 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Lightbox Modal for Gallery ---
     const lightbox = document.getElementById('lightbox');
     const lightboxImg = document.getElementById('lightbox-img');
+    const lightboxVideo = document.getElementById('lightbox-video');
     const lightboxCaption = document.getElementById('lightbox-caption');
     const lightboxWaBtn = document.getElementById('lightbox-wa-btn');
 
-    window.openLightbox = (imageSrc, captionText, waUrl = '') => {
-        lightboxImg.src = imageSrc;
-        lightboxImg.alt = captionText;
+    window.openLightbox = (mediaSrc, captionText, waUrl = '', mediaType = 'image') => {
+        if (mediaType === 'video') {
+            if (lightboxImg) {
+                lightboxImg.style.display = 'none';
+                lightboxImg.src = '';
+            }
+            if (lightboxVideo) {
+                lightboxVideo.src = mediaSrc;
+                lightboxVideo.style.display = 'block';
+                lightboxVideo.play().catch(err => {
+                    console.log('Autoplay prevented on lightbox video:', err);
+                });
+            }
+        } else {
+            if (lightboxVideo) {
+                lightboxVideo.style.display = 'none';
+                lightboxVideo.pause();
+                lightboxVideo.removeAttribute('src');
+                lightboxVideo.load();
+            }
+            if (lightboxImg) {
+                lightboxImg.src = mediaSrc;
+                lightboxImg.alt = captionText;
+                lightboxImg.style.display = 'block';
+            }
+        }
+
         lightboxCaption.textContent = captionText;
 
         if (waUrl) {
@@ -139,6 +165,15 @@ document.addEventListener('DOMContentLoaded', () => {
     window.closeLightbox = () => {
         lightbox.classList.remove('open');
         document.body.style.overflow = 'auto'; // restore background scrolling
+        
+        if (lightboxVideo) {
+            lightboxVideo.pause();
+            lightboxVideo.removeAttribute('src');
+            lightboxVideo.load();
+        }
+        if (lightboxImg) {
+            lightboxImg.src = '';
+        }
     };
 
     // Close lightbox on Escape key
@@ -147,6 +182,124 @@ document.addEventListener('DOMContentLoaded', () => {
             closeLightbox();
         }
     });
+
+    // --- Dynamic Showcase (Gallery) Rendering ---
+    const galleryGrid = document.getElementById('gallery-grid');
+
+    const mockShowcase = [
+        {
+            id: 'mock-1',
+            title: 'Bridal Styling',
+            mediaUrl: 'assets/owner.jpg',
+            mediaType: 'image',
+            description: 'Flawless makeup and elegant hair styling customized for a stunning bridal transformation.'
+        },
+        {
+            id: 'mock-2',
+            title: 'Royal Kundan Bridal Set',
+            mediaUrl: 'assets/jewelry_kundan_set.jpg',
+            mediaType: 'image',
+            description: 'Premium Royal Kundan jewelry set including choker, long necklace, earrings, and mathapatti.'
+        },
+        {
+            id: 'mock-3',
+            title: 'Temple Gold Haram',
+            mediaUrl: 'assets/jewelry_temple_haram.jpg',
+            mediaType: 'image',
+            description: 'Exquisite traditional temple design haram with detailed Nakshi work, perfect for brides.'
+        },
+        {
+            id: 'mock-4',
+            title: 'Antique Guttapusalu Choker',
+            mediaUrl: 'assets/jewelry_guttapusalu.jpg',
+            mediaType: 'image',
+            description: 'Elegant antique guttapusalu choker set with delicate pearls and rubies for a classic look.'
+        },
+        {
+            id: 'mock-5',
+            title: 'CZ Stone Bangles Set',
+            mediaUrl: 'assets/jewelry_cz_bangles.jpg',
+            mediaType: 'image',
+            description: 'Sparkling cubic zirconia bangles set with premium rhodium plating for wedding occasions.'
+        },
+        {
+            id: 'mock-6',
+            title: 'Luxury Polki Jhumkas',
+            mediaUrl: 'assets/jewelry_polki_jhumkas.jpg',
+            mediaType: 'image',
+            description: 'Stunning Polki jhumkas adorned with fresh water pearls and detailed enamel work.'
+        }
+    ];
+
+    const resolveShowcaseUrl = (url) => {
+        if (!url) return '';
+        if (url.startsWith('assets/uploads/')) {
+            return `${CONFIG.API_BASE_URL}/${url}`;
+        }
+        return url;
+    };
+
+    const renderShowcase = () => {
+        if (!galleryGrid) return;
+        galleryGrid.innerHTML = '';
+
+        const itemsToRender = showcaseData && showcaseData.length > 0 ? showcaseData : mockShowcase;
+
+        itemsToRender.forEach((item, index) => {
+            const card = document.createElement('div');
+            card.className = 'gallery-item';
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = `opacity 0.5s ease ${index * 0.05}s, transform 0.5s ease ${index * 0.05}s`;
+
+            const resolvedUrl = resolveShowcaseUrl(item.mediaUrl);
+            const enquiryMessage = `Hi Neha, I saw "${item.title}" in your showcase gallery and I'm interested. Please share more details!`;
+            const waUrl = generateWhatsAppUrl(enquiryMessage);
+
+            let mediaHtml = '';
+            if (item.mediaType === 'video') {
+                mediaHtml = `
+                    <video src="${resolvedUrl}#t=0.1" preload="metadata" muted playsinline class="gallery-img"></video>
+                    <div class="gallery-play-btn">
+                        <i data-lucide="play"></i>
+                    </div>
+                `;
+            } else {
+                mediaHtml = `
+                    <img src="${resolvedUrl}" alt="${item.title}" class="gallery-img">
+                `;
+            }
+
+            card.innerHTML = `
+                ${mediaHtml}
+                <a href="${waUrl}" target="_blank" class="gallery-wa-btn" onclick="event.stopPropagation()" aria-label="Enquire on WhatsApp">
+                    <i data-lucide="message-circle"></i>
+                </a>
+                <div class="gallery-bottom-bar">
+                    <span class="gallery-label">${item.title}</span>
+                    <span class="gallery-price">Enquire</span>
+                </div>
+            `;
+
+            card.onclick = () => {
+                openLightbox(resolvedUrl, item.title, waUrl, item.mediaType || 'image');
+            };
+
+            galleryGrid.appendChild(card);
+        });
+
+        createIconsSafely();
+
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                const cards = galleryGrid.querySelectorAll('.gallery-item');
+                cards.forEach(card => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                });
+            });
+        });
+    };
 
     // --- Dynamic Services Catalog Rendering ---
     const catalogGrid = document.getElementById('catalog-grid');
@@ -223,6 +376,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const res = await fetch(`${CONFIG.API_BASE_URL}/api/products?t=${Date.now()}`);
             if (res.ok) {
                 const data = await res.json();
+                
                 if (data.services && data.services.length > 0) {
                     servicesData = data.services;
                     console.log('Successfully fetched live services data from API');
@@ -234,6 +388,16 @@ document.addEventListener('DOMContentLoaded', () => {
                         renderCatalog(tabType);
                     }
                 }
+
+                if (data.showcase && data.showcase.length > 0) {
+                    showcaseData = [...data.showcase].sort((a, b) => {
+                        const orderA = parseInt(a.order) || 99999;
+                        const orderB = parseInt(b.order) || 99999;
+                        return orderA - orderB;
+                    });
+                    console.log('Successfully fetched live showcase data from API');
+                    renderShowcase();
+                }
             }
         } catch (err) {
             console.log('Server API not running. Falling back to products.js static arrays.');
@@ -242,5 +406,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Page Initialization ---
     renderCatalog('makeup');
+    renderShowcase();
     fetchLiveProducts();
 });

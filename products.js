@@ -889,7 +889,9 @@ const jewelryCategories = [
     "rented jewelry"
 ];
 
+const showcase = [];
+
 // Export for usage
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { services, jewelry, jewelryCategories };
+    module.exports = { services, jewelry, jewelryCategories, showcase };
 }
